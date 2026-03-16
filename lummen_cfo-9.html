@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lummen CFO Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root {
+  --bg:      #020b18;
+  --bg2:     #041120;
+  --card:    #061828;
+  --surface: #081e32;
+  --border:  #0d2640;
+  --border2: #142f52;
+  --accent:  #00d4a0;
+  --accent-d:rgba(0,212,160,0.09);
+  --red:     #ff3055;
+  --red-d:   rgba(255,48,85,0.09);
+  --orange:  #ff7040;
+  --orange-d:rgba(255,112,64,0.09);
+  --yellow:  #ffcc44;
+  --yellow-d:rgba(255,204,68,0.09);
+  --blue:    #3a8fff;
+  --blue-d:  rgba(58,143,255,0.09);
+  --purple:  #9b6dff;
+  --text:    #cdd6e8;
+  --muted:   #3d4d64;
+  --muted2:  #5e718a;
+  --white:   #eef2f9;
+  --sidebar: 220px;
+}
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Figtree',sans-serif;
+  display:flex;
+  flex-direction:column;
+}
+body::after{
+  content:'';position:fixed;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,var(--accent) 40%,var(--blue) 70%,transparent 100%);
+  z-index:999;
+}
+
+/* ═══════════════════════════════════════════════
+   LAYOUT SHELL
+═══════════════════════════════════════════════ */
+.shell{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar);
+  flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+  z-index:10;
+}
+
+.sidebar::before{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,var(--accent) 0%,transparent 60%);
+  opacity:.3;
+}
+
+.sb-brand{
+  padding:20px 18px 16px;
+  border-bottom:1px solid var(--border);
+}
+.sb-brand-name{
+  font-family:'Figtree',sans-serif;
+  font-size:9px;letter-spacing:3px;
+  color:var(--muted2);text-transform:uppercase;
+  margin-bottom:4px;
+}
+.sb-brand-title{
+  font-family:'Figtree',sans-serif;font-weight:900;
+  font-size:22px;letter-spacing:2px;
+  color:var(--white);line-height:1;
+}
+.sb-brand-sub{
+  font-family:'Figtree',sans-serif;
+  font-size:9px;color:var(--accent);
+  margin-top:3px;letter-spacing:1px;
+}
+
+.sb-nav{flex:1;padding:12px 0;overflow-y:auto;}
+
+.sb-section-lbl{
+  font-family:'Figtree',sans-serif;
+  font-size:8px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;
+  padding:10px 18px 6px;
+}
+
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 18px;
+  cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .2s;
+  position:relative;
+}
+.sb-item:hover{background:rgba(255,255,255,.03);}
+.sb-item.active{
+  background:var(--accent-d);
+  border-left-color:var(--accent);
+}
+.sb-item.active .sb-icon{color:var(--accent);}
+.sb-item.active .sb-lbl{color:var(--white);}
+
+.sb-icon{font-size:14px;width:18px;text-align:center;color:var(--muted2);transition:color .2s;}
+.sb-lbl{font-size:12px;font-weight:500;color:var(--muted2);transition:color .2s;white-space:nowrap;}
+.sb-badge{
+  margin-left:auto;
+  font-family:'Figtree',sans-serif;
+  font-size:8px;padding:2px 5px;border-radius:2px;
+  background:var(--red-d);color:var(--red);
+  border:1px solid rgba(255,48,85,.2);
+}
+.sb-badge.g{background:var(--accent-d);color:var(--accent);border-color:rgba(0,212,160,.2);}
+.sb-badge.y{background:var(--yellow-d);color:var(--yellow);border-color:rgba(255,204,68,.2);}
+
+.sb-footer{
+  padding:14px 18px;
+  border-top:1px solid var(--border);
+}
+.sb-footer-date{
+  font-family:'Figtree',sans-serif;
+  font-size:9px;color:var(--muted);letter-spacing:1px;
+}
+.sb-footer-live{
+  display:flex;align-items:center;gap:6px;margin-top:4px;
+  font-family:'Figtree',sans-serif;font-size:9px;color:var(--accent);
+}
+.pulse{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+
+.topbar{
+  height:48px;flex-shrink:0;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 24px;gap:16px;
+}
+.topbar-title{
+  font-family:'Figtree',sans-serif;font-weight:900;
+  font-size:18px;letter-spacing:2px;
+  color:var(--white);
+}
+.topbar-sub{
+  font-family:'Figtree',sans-serif;
+  font-size:10px;color:var(--muted2);letter-spacing:1px;
+}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.topbar-tag{
+  font-family:'Figtree',sans-serif;font-size:9px;
+  padding:4px 10px;border-radius:3px;
+  border:1px solid var(--border2);color:var(--muted2);letter-spacing:1px;
+}
+
+.content-area{flex:1;overflow-y:auto;padding:24px;}
+
+/* ═══════════════════════════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════════════════════════ */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;animation:fadeUp .35s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.stitle{font-family:'Figtree',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.stitle.g{color:var(--accent);}
+.stitle.r{color:var(--red);}
+.stitle.b{color:var(--blue);}
+.stitle.y{color:var(--yellow);}
+.stitle.w{color:var(--orange);}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border2);}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;}
+.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px;}
+.mb14{margin-bottom:14px;}
+.mb20{margin-bottom:20px;}
+
+/* KPI Card */
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;position:relative;overflow:hidden;animation:fadeUp .35s ease both;}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0 0 8px 8px;}
+.kpi.r::after{background:var(--red);}
+.kpi.g::after{background:var(--accent);}
+.kpi.y::after{background:var(--yellow);}
+.kpi.b::after{background:var(--blue);}
+.kpi.o::after{background:var(--orange);}
+.kpi.p::after{background:var(--purple);}
+.kpi-lbl{font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;}
+.kpi-val{font-family:'Figtree',sans-serif;font-weight:900;font-size:24px;letter-spacing:1px;line-height:1;margin-bottom:2px;}
+.kpi.r .kpi-val{color:var(--red);}
+.kpi.g .kpi-val{color:var(--accent);}
+.kpi.y .kpi-val{color:var(--yellow);}
+.kpi.b .kpi-val{color:var(--blue);}
+.kpi.o .kpi-val{color:var(--orange);}
+.kpi.p .kpi-val{color:var(--purple);}
+.kpi-sub{font-family:'Figtree',sans-serif;font-size:9px;color:var(--muted2);}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;}
+th{font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:left;padding:7px 10px;border-bottom:1px solid var(--border2);}
+th.r{text-align:right;}
+td{padding:8px 10px;border-bottom:1px solid rgba(22,28,42,.7);font-family:'Figtree',sans-serif;font-size:11px;}
+td.r{text-align:right;}
+tr:last-child td{border-bottom:none;}
+
+/* Sliders */
+input[type=range]{width:100%;-webkit-appearance:none;height:3px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px rgba(0,212,160,.5);transition:transform .15s;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3);}
+input[type=range].r::-webkit-slider-thumb{background:var(--red);box-shadow:0 0 8px rgba(255,48,85,.5);}
+input[type=range].o::-webkit-slider-thumb{background:var(--orange);box-shadow:0 0 8px rgba(255,112,64,.5);}
+input[type=range].y::-webkit-slider-thumb{background:var(--yellow);box-shadow:0 0 8px rgba(255,204,68,.5);}
+input[type=range].b::-webkit-slider-thumb{background:var(--blue);box-shadow:0 0 8px rgba(58,143,255,.5);}
+input[type=range].locked::-webkit-slider-thumb{background:var(--muted);box-shadow:none;cursor:not-allowed;}
+
+/* Alert */
+.alert{padding:10px 13px;border-radius:6px;font-family:'Figtree',sans-serif;font-size:11px;line-height:1.5;border:1px solid;margin-top:10px;}
+.alert.r{background:var(--red-d);border-color:rgba(255,48,85,.2);color:var(--red);}
+.alert.g{background:var(--accent-d);border-color:rgba(0,212,160,.2);color:var(--accent);}
+.alert.y{background:var(--yellow-d);border-color:rgba(255,204,68,.2);color:var(--yellow);}
+
+/* Insight */
+.insight{padding:12px 13px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);margin-top:10px;}
+.ins-lbl{font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.ins-txt{font-family:'Figtree',sans-serif;font-size:11px;line-height:1.6;color:var(--muted2);}
+
+/* Bar */
+.bar-wrap{display:flex;align-items:center;gap:8px;}
+.bar-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;min-width:50px;}
+.bar-fill{height:100%;border-radius:2px;}
+
+/* Meter */
+.meter-track{height:8px;background:var(--border2);border-radius:4px;overflow:hidden;}
+.meter-fill{height:100%;border-radius:4px;transition:width .5s ease,background .4s;}
+
+/* Pills */
+.pill{display:inline-block;padding:2px 7px;border-radius:3px;font-family:'Figtree',sans-serif;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.pill.g{background:var(--accent-d);color:var(--accent);border:1px solid rgba(0,212,160,.2);}
+.pill.r{background:var(--red-d);color:var(--red);border:1px solid rgba(255,48,85,.2);}
+.pill.y{background:var(--yellow-d);color:var(--yellow);border:1px solid rgba(255,204,68,.2);}
+.pill.o{background:var(--orange-d);color:var(--orange);border:1px solid rgba(255,112,64,.2);}
+
+/* sl-hints */
+.sl-hints{display:flex;justify-content:space-between;margin-top:3px;font-family:'Figtree',sans-serif;font-size:9px;color:var(--muted);}
+.sl-block{margin-bottom:16px;}
+.sl-hdr{display:flex;justify-content:space-between;margin-bottom:6px;}
+.sl-lbl{font-size:12px;font-weight:600;}
+.sl-val{font-family:'Figtree',sans-serif;font-size:13px;font-weight:500;}
+
+/* Res box */
+.res-box{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
+.res-row{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid var(--border);}
+.res-row:last-child{border:none;}
+.rk{font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);}
+.rv{font-family:'Figtree',sans-serif;font-size:12px;font-weight:700;}
+.rv.r{color:var(--red);}.rv.g{color:var(--accent);}.rv.y{color:var(--yellow);}.rv.b{color:var(--blue);}.rv.o{color:var(--orange);}
+
+/* Stack bar */
+.stack-bar{height:12px;border-radius:6px;overflow:hidden;display:flex;margin:8px 0;}
+.stack-seg{height:100%;transition:width .5s ease;}
+
+/* Phase bar */
+.ph-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px;}
+.ph-fill{height:100%;border-radius:3px;}
+
+/* Conv bar */
+.conv-row{display:flex;align-items:center;gap:8px;}
+.conv-track{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.conv-fill{height:100%;border-radius:2px;}
+
+/* ═══════════════════════════════════════════════
+   VIEWS
+═══════════════════════════════════════════════ */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ─────────────────────────
+   HOME
+───────────────────────── */
+.home-hero{
+  background:linear-gradient(135deg,var(--card) 0%,var(--bg2) 100%);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:24px 28px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+  position:relative;
+  overflow:hidden;
+}
+.home-hero::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:200px;height:200px;
+  background:radial-gradient(circle,rgba(0,212,160,.06) 0%,transparent 70%);
+  border-radius:50%;
+}
+.home-hero-left h1{
+  font-family:'Figtree',sans-serif;font-weight:900;
+  font-size:38px;letter-spacing:2px;line-height:1;
+  color:var(--white);margin-bottom:6px;
+}
+.home-hero-left p{
+  font-family:'Figtree',sans-serif;
+  font-size:11px;color:var(--muted2);line-height:1.6;
+}
+.home-stat{text-align:right;}
+.home-stat-lbl{font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.home-stat-val{font-family:'Figtree',sans-serif;font-weight:900;font-size:30px;letter-spacing:1px;}
+
+.module-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px;
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+}
+.module-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;}
+.module-card.g::before{background:var(--accent);}
+.module-card.r::before{background:var(--red);}
+.module-card.y::before{background:var(--yellow);}
+.module-card.b::before{background:var(--blue);}
+.mc-icon{font-size:22px;margin-bottom:10px;}
+.mc-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.mc-desc{font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);line-height:1.5;margin-bottom:12px;}
+.mc-kpis{display:flex;flex-direction:column;gap:4px;}
+.mc-kpi-row{display:flex;justify-content:space-between;font-family:'Figtree',sans-serif;font-size:10px;}
+.mc-kpi-k{color:var(--muted);}
+.mc-kpi-v{font-weight:600;}
+.mc-btn{
+  margin-top:12px;
+  width:100%;padding:7px;
+  border-radius:5px;border:1px solid var(--border2);
+  background:transparent;color:var(--muted2);
+  font-family:'Figtree',sans-serif;font-size:10px;
+  letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+}
+.mc-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+
+/* Histórico mini-chart */
+.hist-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.hist-bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;}
+.hist-lbl{font-family:'Figtree',sans-serif;font-size:8px;color:var(--muted);}
+
+/* ─────────────────────────
+   CENÁRIOS
+───────────────────────── */
+.sc-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.sc-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;}
+.sc-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.sc-card.a-r{border-color:var(--red);background:var(--red-d);}
+.sc-card.a-y{border-color:var(--yellow);background:var(--yellow-d);}
+.sc-card.a-o{border-color:var(--orange);background:var(--orange-d);}
+.sc-card.a-g{border-color:var(--accent);background:var(--accent-d);}
+.sc-badge{font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.sc-badge.r{color:var(--red);}.sc-badge.y{color:var(--yellow);}.sc-badge.o{color:var(--orange);}.sc-badge.g{color:var(--accent);}
+.sc-name{font-size:12px;font-weight:700;margin-bottom:10px;}
+.sc-row{display:flex;justify-content:space-between;font-family:'Figtree',sans-serif;font-size:10px;margin-bottom:3px;}
+.sc-row .k{color:var(--muted);}.sc-row .v.r{color:var(--red);}.sc-row .v.y{color:var(--yellow);}.sc-row .v.g{color:var(--accent);}.sc-row .v.o{color:var(--orange);}
+
+/* ─────────────────────────
+   REDUÇÃO
+───────────────────────── */
+.cut-table{width:100%;border-collapse:collapse;}
+.cut-table th{font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--border2);text-align:left;}
+.cut-table th.r{text-align:right;}
+.cut-table td{padding:9px 10px;border-bottom:1px solid rgba(22,28,42,.8);font-family:'Figtree',sans-serif;font-size:11px;vertical-align:middle;}
+.cut-table tr:last-child td{border-bottom:none;}
+.cut-slider{-webkit-appearance:none;width:100%;height:3px;border-radius:2px;outline:none;cursor:pointer;background:var(--border2);}
+.cut-slider::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--red);cursor:pointer;box-shadow:0 0 8px rgba(255,48,85,.5);transition:transform .15s;}
+.cut-slider::-webkit-slider-thumb:hover{transform:scale(1.3);}
+.cut-slider.locked::-webkit-slider-thumb{background:var(--muted);box-shadow:none;cursor:not-allowed;}
+
+/* ─────────────────────────
+   VENDEDORES
+───────────────────────── */
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.badge.alta{background:var(--accent-d);color:var(--accent);}
+.badge.media{background:var(--yellow-d);color:var(--yellow);}
+.badge.baixa{background:var(--orange-d);color:var(--orange);}
+.badge.critico{background:var(--red-d);color:var(--red);border:1px solid rgba(255,48,85,.3);}
+
+/* ─────────────────────────
+   TIMELINE REDUÇÃO
+───────────────────────── */
+.timeline{display:flex;gap:0;margin-top:14px;}
+.tl-item{flex:1;padding:14px;border:1px solid var(--border);border-right:none;background:var(--bg2);}
+.tl-item:first-child{border-radius:8px 0 0 8px;}
+.tl-item:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px 0;}
+.tl-num{font-family:'Figtree',sans-serif;font-weight:900;font-size:32px;color:var(--border2);line-height:1;margin-bottom:4px;}
+.tl-phase{font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.tl-phase.r{color:var(--red);}.tl-phase.y{color:var(--yellow);}.tl-phase.g{color:var(--accent);}
+.tl-txt{font-size:11px;color:var(--muted2);line-height:1.5;}
+.tl-saving{font-family:'Figtree',sans-serif;font-size:11px;font-weight:600;margin-top:8px;}
+.tl-saving.r{color:var(--red);}.tl-saving.y{color:var(--yellow);}.tl-saving.g{color:var(--accent);}
+
+/* mix legend */
+.legend-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.legend-lbl{font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);flex:1;}
+.legend-val{font-family:'Figtree',sans-serif;font-size:11px;font-weight:600;}
+
+/* checklist */
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.check-item:last-child{border:none;}
+.check-box{width:16px;height:16px;border:1px solid var(--border2);border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .2s;}
+.check-box.done{background:var(--accent);border-color:var(--accent);}
+.check-box.done::after{content:'✓';font-size:10px;color:white;font-weight:700;}
+.check-box.pending{border-color:var(--red);}
+.check-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.check-detail{font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);line-height:1.4;}
+.check-saving{font-family:'Figtree',sans-serif;font-size:11px;font-weight:600;margin-top:3px;}
+
+/* be-card */
+.be-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;position:relative;overflow:hidden;}
+.be-card.highlight{border-color:var(--accent);background:var(--accent-d);}
+.be-card.highlight::before{content:'META';position:absolute;top:8px;right:8px;font-family:'Figtree',sans-serif;font-size:8px;letter-spacing:2px;color:var(--accent);background:rgba(0,212,160,.15);padding:2px 6px;border-radius:2px;}
+.be-spread{font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);margin-bottom:5px;}
+.be-vol{font-family:'Figtree',sans-serif;font-weight:900;font-size:24px;letter-spacing:1px;}
+.be-vol.r{color:var(--red);}.be-vol.y{color:var(--yellow);}.be-vol.g{color:var(--accent);}
+.be-lbl{font-family:'Figtree',sans-serif;font-size:9px;color:var(--muted2);margin-top:3px;}
+
+/* scrollbar */
+.content-area::-webkit-scrollbar,.sb-nav::-webkit-scrollbar{width:4px;}
+.content-area::-webkit-scrollbar-track,.sb-nav::-webkit-scrollbar-track{background:transparent;}
+.content-area::-webkit-scrollbar-thumb,.sb-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon">L</div>
+      <div>
+        <div class="sb-brand-name">LUMMEN</div>
+        <div class="sb-brand-sub">CFO Desk</div>
+      </div>
+    </div>
+    
+    <div class="sb-section-lbl">Principal</div>
+    <div class="sb-item active" onclick="nav('home',this)">
+      <span class="sb-icon">⌂</span>
+      <span class="sb-lbl">Visão Geral</span>
+    </div>
+
+    <div class="sb-section-lbl">Módulos</div>
+    <div class="sb-item" onclick="nav('cenarios',this)">
+      <span class="sb-icon">◈</span>
+      <span class="sb-lbl">Cenários</span>
+      <span class="sb-badge y">5%</span>
+    </div>
+    <div class="sb-item" onclick="nav('despesas',this)">
+      <span class="sb-icon">◉</span>
+      <span class="sb-lbl">Despesas</span>
+      <span class="sb-badge">702k</span>
+    </div>
+    <div class="sb-item" onclick="nav('reducao',this)">
+      <span class="sb-icon">⬇</span>
+      <span class="sb-lbl">Redução</span>
+      <span class="sb-badge">−118k</span>
+    </div>
+    <div class="sb-item" onclick="nav('historico',this)">
+      <span class="sb-icon">▤</span>
+      <span class="sb-lbl">Histórico</span>
+      <span class="sb-badge g">7 meses</span>
+    </div>
+    <div class="sb-item" onclick="nav('comercial',this)">
+      <span class="sb-icon">◎</span>
+      <span class="sb-lbl">Comercial</span>
+      <span class="sb-badge">8,1%</span>
+    </div>
+
+    <div class="sb-section-lbl">Operacional</div>
+    <div class="sb-item" onclick="nav('op-leads',this)">
+      <span class="sb-icon" style="font-size:11px">◦</span>
+      <span class="sb-lbl">Leads</span>
+      <span class="sb-badge">1.439</span>
+    </div>
+    <div class="sb-item" onclick="nav('op-conversao',this)">
+      <span class="sb-icon" style="font-size:11px">◦</span>
+      <span class="sb-lbl">Conversão</span>
+      <span class="sb-badge r">8,13%</span>
+    </div>
+    <div class="sb-item" onclick="nav('op-negociacao',this)">
+      <span class="sb-icon" style="font-size:11px">◦</span>
+      <span class="sb-lbl">Negociação</span>
+      <span class="sb-badge r">7/10 int.</span>
+    </div>
+    <div class="sb-item" onclick="nav('op-pipeline',this)">
+      <span class="sb-icon" style="font-size:11px">◦</span>
+      <span class="sb-lbl">Pipeline</span>
+      <span class="sb-badge g">R$43,6M</span>
+    </div>
+    <div class="sb-item" onclick="nav('op-receita',this)">
+      <span class="sb-icon" style="font-size:11px">◦</span>
+      <span class="sb-lbl">Receita Trânsito</span>
+      <span class="sb-badge r">44% rep.</span>
+    </div>
+  
+    <div class="sb-section-lbl">Estratégico</div>
+    <div class="sb-item" onclick="nav('global',this)">
+      <span class="sb-icon">◑</span>
+      <span class="sb-lbl">Análise Global</span>
+      <span class="sb-badge y">Ago→Fev</span>
+    </div>
+
+    <div class="sb-footer">
+      <div class="sb-footer-date">Fev / 2026</div>
+      <div class="sb-footer-pulse"><span class="pulse-dot"></span>Monitoramento ativo</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="top-title" id="topTitle">VISÃO GERAL</div>
+        <div class="top-sub" id="topSub">Consolidado CFO · Fevereiro 2026</div>
+      </div>
+      <div class="top-tags">
+        <span class="tag">AGO/25→FEV/26</span>
+        <span class="tag r">⚠ REESTRUTURAÇÃO</span>
+      </div>
+    </div>
+
+    <div class="content-area">
+<div class="view active" id="view-home">
+
+    <!-- Hero -->
+    <div class="home-hero mb20">
+      <div class="home-hero-left">
+        <h1>LUMMEN CFO DASHBOARD</h1>
+        <p>
+          Painel executivo consolidado · Operação de compra e venda de ativos judiciais<br>
+          Período analisado: Ago/25 → Fev/26 · Base: Fevereiro/2026
+        </p>
+      </div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div class="home-stat">
+          <div class="home-stat-lbl">Spread Fev/26</div>
+          <div class="home-stat-val" style="color:var(--red)">5,69%</div>
+        </div>
+        <div class="home-stat">
+          <div class="home-stat-lbl">Pipeline</div>
+          <div class="home-stat-val" style="color:var(--accent)">R$43,6M</div>
+        </div>
+        <div class="home-stat">
+          <div class="home-stat-lbl">Conversão</div>
+          <div class="home-stat-val" style="color:var(--red)">8,13%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs Consolidados -->
+    <div class="stitle g mb14" style="margin-bottom:10px">KPIs consolidados</div>
+    <div class="g6 mb20">
+      <div class="kpi r" style="animation-delay:.05s">
+        <div class="kpi-lbl">Spread atual</div>
+        <div class="kpi-val">5,69%</div>
+        <div class="kpi-sub">BE: 6,25%</div>
+      </div>
+      <div class="kpi r" style="animation-delay:.08s">
+        <div class="kpi-lbl">Estrutura</div>
+        <div class="kpi-val">R$ 667k</div>
+        <div class="kpi-sub">meta: R$550k</div>
+      </div>
+      <div class="kpi y" style="animation-delay:.11s">
+        <div class="kpi-lbl">Resultado</div>
+        <div class="kpi-val">R$ 228k</div>
+        <div class="kpi-sub">Fev/26 base 4,65M</div>
+      </div>
+      <div class="kpi g" style="animation-delay:.14s">
+        <div class="kpi-lbl">Pipeline</div>
+        <div class="kpi-val">R$ 43,6M</div>
+        <div class="kpi-sub">3,6× meta mensal</div>
+      </div>
+      <div class="kpi r" style="animation-delay:.17s">
+        <div class="kpi-lbl">Conversão</div>
+        <div class="kpi-val">8,13%</div>
+        <div class="kpi-sub">mín: 12%</div>
+      </div>
+      <div class="kpi b" style="animation-delay:.2s">
+        <div class="kpi-lbl">Breakeven</div>
+        <div class="kpi-val">R$ 11M</div>
+        <div class="kpi-sub">spread 5% c/ 550k</div>
+      </div>
+    </div>
+
+    <!-- Módulos -->
+    <div class="stitle b mb14" style="margin-bottom:10px">Módulos disponíveis</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px">
+      <div class="module-card g" onclick="nav('cenarios',document.querySelector('[onclick*=cenarios]'))">
+        <div class="mc-icon">◈</div>
+        <div class="mc-title">Cenários de Negócio</div>
+        <div class="mc-desc">Simulador de spread, compras e conversão com breakeven em tempo real.</div>
+        <div class="mc-kpis">
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Spread atual</span><span class="mc-kpi-v" style="color:var(--red)">5,69%</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">BE atual</span><span class="mc-kpi-v" style="color:var(--yellow)">R$ 13,4M</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Meta spread</span><span class="mc-kpi-v" style="color:var(--accent)">7%+</span></div>
+        </div>
+        <button class="mc-btn">Abrir cenários →</button>
+      </div>
+      <div class="module-card r" onclick="nav('despesas',document.querySelector('[onclick*=despesas]'))">
+        <div class="mc-icon">◉</div>
+        <div class="mc-title">Despesas</div>
+        <div class="mc-desc">Detalhamento completo da estrutura de custos com simulador por linha.</div>
+        <div class="mc-kpis">
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Mão de obra</span><span class="mc-kpi-v" style="color:var(--red)">R$ 421k</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Custo fixo</span><span class="mc-kpi-v" style="color:var(--orange)">R$ 136k</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Impostos</span><span class="mc-kpi-v" style="color:var(--yellow)">R$ 96k</span></div>
+        </div>
+        <button class="mc-btn">Abrir despesas →</button>
+      </div>
+      <div class="module-card y" onclick="nav('reducao',document.querySelector('[onclick*=reducao]'))">
+        <div class="mc-icon">⬇</div>
+        <div class="mc-title">Painel de Redução</div>
+        <div class="mc-desc">Simulador de reestruturação com meta R$550k e plano de 90 dias.</div>
+        <div class="mc-kpis">
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Estrutura atual</span><span class="mc-kpi-v" style="color:var(--red)">R$ 667k</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Corte necessário</span><span class="mc-kpi-v" style="color:var(--yellow)">R$ 118k</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Meta</span><span class="mc-kpi-v" style="color:var(--accent)">R$ 550k</span></div>
+        </div>
+        <button class="mc-btn">Abrir redução →</button>
+      </div>
+      <div class="module-card b" onclick="nav('historico',document.querySelector('[onclick*=historico]'))">
+        <div class="mc-icon">▤</div>
+        <div class="mc-title">Histórico & Comercial</div>
+        <div class="mc-desc">Performance Ago/25→Fev/26, pipeline por fase e conversão por vendedor.</div>
+        <div class="mc-kpis">
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Melhor mês</span><span class="mc-kpi-v" style="color:var(--accent)">Dez/25 8,68%</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Pipeline</span><span class="mc-kpi-v" style="color:var(--blue)">R$ 43,6M</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Pot. oculto</span><span class="mc-kpi-v" style="color:var(--yellow)">+R$13,2M</span></div>
+        </div>
+        <button class="mc-btn">Abrir histórico →</button>
+      </div>
+      <div class="module-card r" onclick="nav('op-leads',document.querySelector('[onclick*=op-leads]'))">
+        <div class="mc-icon">⚙</div>
+        <div class="mc-title">Operação</div>
+        <div class="mc-desc">Leads, conversão, pipeline por vendedor e receita em trânsito.</div>
+        <div class="mc-kpis">
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Pipeline</span><span class="mc-kpi-v" style="color:var(--blue)">R$43,6M</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Reprovados</span><span class="mc-kpi-v" style="color:var(--red)">44%</span></div>
+          <div class="mc-kpi-row"><span class="mc-kpi-k">Pot. oculto</span><span class="mc-kpi-v" style="color:var(--accent)">+R$13,2M</span></div>
+        </div>
+        <button class="mc-btn">Abrir operação →</button>
+      </div>
+    </div>
+
+    <!-- Alertas executivos -->
+    <div class="stitle r mb14" style="margin-bottom:10px">Alertas executivos</div>
+    <div class="g3">
+      <div class="panel" style="border-color:rgba(255,48,85,.2);background:var(--red-d)">
+        <div style="font-family:'Figtree',sans-serif;font-size:9px;color:var(--red);letter-spacing:2px;margin-bottom:8px">⚠ CRÍTICO</div>
+        <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:6px">Spread abaixo do breakeven</div>
+        <div style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);line-height:1.6">Fev/26 fechou em 5,69%.<br>Breakeven exige 6,25%.<br>Cada mês assim = déficit estrutural.</div>
+      </div>
+      <div class="panel" style="border-color:rgba(255,204,68,.2);background:var(--yellow-d)">
+        <div style="font-family:'Figtree',sans-serif;font-size:9px;color:var(--yellow);letter-spacing:2px;margin-bottom:8px">→ ATENÇÃO</div>
+        <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:6px">Conversão 8,13% vs meta 12%</div>
+        <div style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);line-height:1.6">Gap de 3,87 p.p. representa<br>R$13,2M em compras não geradas<br>sem contratar ninguém.</div>
+      </div>
+      <div class="panel" style="border-color:rgba(0,212,160,.2);background:var(--accent-d)">
+        <div style="font-family:'Figtree',sans-serif;font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:8px">✓ OPORTUNIDADE</div>
+        <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:6px">Pipeline R$43,6M = 3,6× meta</div>
+        <div style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);line-height:1.6">Volume não é problema.<br>54% travado em pendência processual.<br>Desbloquear giro = resultado imediato.</div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-cenarios">
+    <div class="sc-grid4 mb14">
+      <div class="sc-card" id="sca-A" onclick="loadCenario('A',this)">
+        <div class="sc-badge r">⚠ Cenário A - Atual</div>
+        <div class="sc-name">Volume alto, margem comprimida</div>
+        <div class="sc-row"><span class="k">Spread</span><span class="v r">5%</span></div>
+        <div class="sc-row"><span class="k">Compras</span><span class="v r">R$4,6M</span></div>
+        <div class="sc-row"><span class="k">Conversão</span><span class="v r">8,1%</span></div>
+        <div class="sc-row"><span class="k">Resultado</span><span class="v r">Déficit</span></div>
+      </div>
+      <div class="sc-card" id="sca-B" onclick="loadCenario('B',this)">
+        <div class="sc-badge y">↗ Cenário B - Pressão</div>
+        <div class="sc-name">Spread 5% com volume forçado</div>
+        <div class="sc-row"><span class="k">Spread</span><span class="v y">5%</span></div>
+        <div class="sc-row"><span class="k">Compras</span><span class="v y">R$13M</span></div>
+        <div class="sc-row"><span class="k">Conversão</span><span class="v y">12%</span></div>
+        <div class="sc-row"><span class="k">Resultado</span><span class="v y">R$50k</span></div>
+      </div>
+      <div class="sc-card" id="sca-C" onclick="loadCenario('C',this)">
+        <div class="sc-badge o">↑ Cenário C - Ajustado</div>
+        <div class="sc-name">Spread 6,5% + eficiência</div>
+        <div class="sc-row"><span class="k">Spread</span><span class="v o">6,5%</span></div>
+        <div class="sc-row"><span class="k">Compras</span><span class="v o">R$12M</span></div>
+        <div class="sc-row"><span class="k">Conversão</span><span class="v o">12%</span></div>
+        <div class="sc-row"><span class="k">Resultado</span><span class="v o">R$230k</span></div>
+      </div>
+      <div class="sc-card" id="sca-D" onclick="loadCenario('D',this)">
+        <div class="sc-badge g">✓ Cenário D - Meta</div>
+        <div class="sc-name">Spread 7% histórico + 15% conv.</div>
+        <div class="sc-row"><span class="k">Spread</span><span class="v g">7%</span></div>
+        <div class="sc-row"><span class="k">Compras</span><span class="v g">R$12M</span></div>
+        <div class="sc-row"><span class="k">Conversão</span><span class="v g">15%</span></div>
+        <div class="sc-row"><span class="k">Resultado</span><span class="v g">R$315k</span></div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="panel">
+        <div class="stitle g">Simulador</div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Spread médio (%)</span><span class="sl-val" style="color:var(--accent)" id="c-vSp">5,0%</span></div>
+          <input type="range" id="c-sSp" min="4" max="12" step="0.1" value="5" oninput="calcCenario()">
+          <div class="sl-hints"><span>4%</span><span style="color:var(--red)">BE: 6,25%</span><span style="color:var(--yellow)">Hist: 7%</span><span>12%</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Compras mensais (R$M)</span><span class="sl-val" style="color:var(--orange)" id="c-vCp">R$ 4,6M</span></div>
+          <input type="range" class="o" id="c-sCp" min="1" max="20" step="0.5" value="4.6" oninput="calcCenario()">
+          <div class="sl-hints"><span>R$1M</span><span style="color:var(--yellow)">Meta: R$12M</span><span style="color:var(--accent)">Ideal: R$14M</span><span>R$20M</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Conversão comercial (%)</span><span class="sl-val" style="color:var(--blue)" id="c-vCv">8,1%</span></div>
+          <input type="range" class="b" id="c-sCv" min="5" max="25" step="0.1" value="8.1" oninput="calcCenario()">
+          <div class="sl-hints"><span>5%</span><span style="color:var(--red)">Atual: 8,1%</span><span style="color:var(--yellow)">Mín: 12%</span><span style="color:var(--accent)">Meta: 18%</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Estrutura mensal (R$k)</span><span class="sl-val" style="color:var(--yellow)" id="c-vEs">R$ 550k</span></div>
+          <input type="range" class="y" id="c-sEs" min="350" max="750" step="5" value="550" oninput="calcCenario()">
+          <div class="sl-hints"><span>R$350k</span><span style="color:var(--accent)">Meta: R$550k</span><span style="color:var(--red)">Ant: R$667k</span><span>R$750k</span></div>
+        </div>
+        <!-- BE display -->
+        <div style="padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;margin-top:6px">
+          <div style="font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Breakeven calculado</div>
+          <div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:26px;letter-spacing:1px;" id="c-beVal">R$ 11,0M/mês</div>
+          <div style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);margin-top:3px" id="c-beSub">R$ 550k ÷ 5,0% = volume mínimo</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="stitle r">Resultado projetado</div>
+        <div class="res-box">
+          <div class="res-row"><span class="rk">Receita bruta</span><span class="rv g" id="c-rRec">-</span></div>
+          <div class="res-row"><span class="rk">Estrutura total</span><span class="rv o" id="c-rEst">-</span></div>
+          <div class="res-row"><span class="rk">Resultado operacional</span><span class="rv" id="c-rRes">-</span></div>
+          <div class="res-row"><span class="rk">Margem operacional</span><span class="rv" id="c-rMgm">-</span></div>
+          <div class="res-row"><span class="rk">Breakeven</span><span class="rv b" id="c-rBE">-</span></div>
+          <div class="res-row"><span class="rk">Impacto conversão</span><span class="rv" id="c-rCv" style="font-size:10px">-</span></div>
+        </div>
+        <div style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);margin-bottom:5px">
+            <span>Margem operacional</span><span id="c-mPct">-</span>
+          </div>
+          <div class="meter-track"><div class="meter-fill" id="c-mFill" style="width:0%;background:var(--red)"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-family:'Figtree',sans-serif;font-size:9px;">
+            <span style="color:var(--muted)">0%</span><span style="color:var(--red)">Crit. &lt;5%</span><span style="color:var(--yellow)">OK 10%</span><span style="color:var(--accent)">Meta 15%+</span><span style="color:var(--muted)">30%</span>
+          </div>
+        </div>
+        <div class="alert r" id="c-alert">Calculando...</div>
+
+        <!-- Mix produto -->
+        <div class="insight" style="margin-top:10px">
+          <div class="ins-lbl">Mix - estratégia por produto</div>
+          <div style="margin-top:6px">
+            <div class="legend-row"><div class="legend-dot" style="background:var(--accent)"></div><span class="legend-lbl">INSS RPV</span><span class="legend-val" style="color:var(--accent)">18–23% → Expandir</span></div>
+            <div class="legend-row"><div class="legend-dot" style="background:var(--blue)"></div><span class="legend-lbl">Incontroverso</span><span class="legend-val" style="color:var(--blue)">7–11% → Priorizar</span></div>
+            <div class="legend-row"><div class="legend-dot" style="background:var(--yellow)"></div><span class="legend-lbl">Pré-Precatório</span><span class="legend-val" style="color:var(--yellow)">1–6% → Limitar</span></div>
+            <div class="legend-row"><div class="legend-dot" style="background:var(--red)"></div><span class="legend-lbl">Federal CH</span><span class="legend-val" style="color:var(--red)">Volátil → Filtrar</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-despesas">
+    <div class="g6 mb14">
+      <div class="kpi r"><div class="kpi-lbl">Total geral</div><div class="kpi-val">R$ 777k</div><div class="kpi-sub">c/ impostos</div></div>
+      <div class="kpi o"><div class="kpi-lbl">Estrutura op.</div><div class="kpi-val">R$ 667k</div><div class="kpi-sub">mão de obra + fixo</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Mão de obra</div><div class="kpi-val">R$ 386k</div><div class="kpi-sub">equipe + dir. ajustada</div></div>
+      <div class="kpi b"><div class="kpi-lbl">Custo fixo</div><div class="kpi-val">R$ 136k</div><div class="kpi-sub">aluguel R$70k + plat</div></div>
+      <div class="kpi p"><div class="kpi-lbl">Endividamento</div><div class="kpi-val">R$ 247k</div><div class="kpi-sub">impostos + fornecedores</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Empréstimos</div><div class="kpi-val">R$ 1,52M</div><div class="kpi-sub">Wesley/Carol/Andre/Leonard</div></div>
+    </div>
+
+    <div class="g2 mb14">
+      <!-- Mão de obra -->
+      <div class="panel">
+        <div class="stitle r">Mão de obra - R$ 386.149</div>
+        <!-- Stack equipe -->
+        <div style="font-family:'Figtree',sans-serif;font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">EQUIPE - R$ 211.149</div>
+        <div class="stack-bar">
+          <div class="stack-seg" style="width:43%;background:var(--accent)"></div>
+          <div class="stack-seg" style="width:32%;background:var(--blue)"></div>
+          <div class="stack-seg" style="width:15%;background:var(--yellow)"></div>
+          <div class="stack-seg" style="width:10%;background:var(--orange)"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px">
+          <div class="legend-row"><div class="legend-dot" style="background:var(--accent)"></div><span class="legend-lbl">Vendedores</span><span class="legend-val" style="color:var(--accent)">R$90.671</span></div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--blue)"></div><span class="legend-lbl">Jurídico</span><span class="legend-val" style="color:var(--blue)">R$67.827</span></div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--yellow)"></div><span class="legend-lbl">CSC</span><span class="legend-val" style="color:var(--yellow)">R$32.786</span></div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--orange)"></div><span class="legend-lbl">SDR/LDR</span><span class="legend-val" style="color:var(--orange)">R$19.864</span></div>
+        </div>
+
+        <div style="font-family:'Figtree',sans-serif;font-size:9px;color:var(--muted);margin-bottom:6px;letter-spacing:1px">DIRETORIA - R$ 175.000 (ajustada ✓)</div>
+        <table>
+          <thead><tr><th>Cargo</th><th class="r">Antes</th><th class="r">Após</th><th class="r">Corte</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text)">Comercial</td><td class="r" style="color:var(--muted2)">R$30k</td><td class="r" style="color:var(--accent)">R$25k</td><td class="r" style="color:var(--yellow)">−R$5k</td></tr>
+            <tr><td style="color:var(--text)">Financeiro</td><td class="r" style="color:var(--muted2)">R$30k</td><td class="r" style="color:var(--accent)">R$25k</td><td class="r" style="color:var(--yellow)">−R$5k</td></tr>
+            <tr><td style="color:var(--text)">Jurídica</td><td class="r" style="color:var(--muted2)">R$30k</td><td class="r" style="color:var(--accent)">R$25k</td><td class="r" style="color:var(--yellow)">−R$5k</td></tr>
+            <tr><td style="color:var(--text)">Negócios</td><td class="r" style="color:var(--muted2)">R$60k</td><td class="r" style="color:var(--accent)">R$50k</td><td class="r" style="color:var(--yellow)">−R$10k</td></tr>
+            <tr><td style="color:var(--text)">Tecnologia</td><td class="r" style="color:var(--muted2)">R$60k</td><td class="r" style="color:var(--accent)">R$50k</td><td class="r" style="color:var(--yellow)">−R$10k</td></tr>
+            <tr style="background:var(--accent-d)"><td style="font-weight:700;color:var(--text)">Total</td><td class="r" style="color:var(--muted2)">R$210k</td><td class="r" style="color:var(--accent);font-weight:700">R$175k</td><td class="r" style="color:var(--accent);font-weight:700">−R$35k</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Custo + Despesas -->
+      <div class="panel">
+        <div class="stitle b">Custo fixo - R$ 136.129</div>
+        <table>
+          <thead><tr><th>Item</th><th class="r">Valor</th><th class="r">%</th><th>Barra</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text)">Aluguel</td><td class="r" style="color:var(--red)">R$70.000</td><td class="r" style="color:var(--red)">51,4%</td><td><div class="ph-bar"><div class="ph-fill" style="width:51.4%;background:var(--red)"></div></div></td></tr>
+            <tr><td style="color:var(--text)">Plataforma</td><td class="r" style="color:var(--blue)">R$56.235</td><td class="r" style="color:var(--muted2)">41,3%</td><td><div class="ph-bar"><div class="ph-fill" style="width:41.3%;background:var(--blue)"></div></div></td></tr>
+            <tr><td style="color:var(--text)">Desp. Diretoria</td><td class="r" style="color:var(--yellow)">R$8.723</td><td class="r" style="color:var(--muted2)">6,4%</td><td><div class="ph-bar"><div class="ph-fill" style="width:6.4%;background:var(--yellow)"></div></div></td></tr>
+            <tr><td style="color:var(--text)">Telefonia</td><td class="r" style="color:var(--muted2)">R$1.058</td><td class="r" style="color:var(--muted2)">0,8%</td><td><div class="ph-bar"><div class="ph-fill" style="width:0.8%;background:var(--muted)"></div></div></td></tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:16px">
+          <div class="stitle y">Despesas variáveis - R$ 48.817</div>
+          <table>
+            <thead><tr><th>Item</th><th class="r">Valor</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--text)">Juros empréstimos 3ºs</td><td class="r" style="color:var(--red)">R$13.600</td></tr>
+              <tr><td style="color:var(--text)">Plataforma Bem Estar</td><td class="r" style="color:var(--orange)">R$5.748</td></tr>
+              <tr><td style="color:var(--text)">Prestador de Serviço</td><td class="r" style="color:var(--orange)">R$5.750</td></tr>
+              <tr><td style="color:var(--text)">Contabilidade</td><td class="r" style="color:var(--muted2)">R$9.912</td></tr>
+              <tr><td style="color:var(--text)">QSA</td><td class="r" style="color:var(--yellow)">R$4.554</td></tr>
+              <tr><td style="color:var(--text)">Marketing Digital</td><td class="r" style="color:var(--yellow)">R$3.500</td></tr>
+              <tr><td style="color:var(--text)">Sistema + outros</td><td class="r" style="color:var(--muted2)">R$5.753</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="insight">
+          <div class="ins-lbl">Maior risco - juros</div>
+          <div class="ins-txt">R$13.600/mês em juros sobre R$1,524M de empréstimos.<br>Plano de amortização é prioridade para reduzir estrutura.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impostos + Endividamento -->
+    <div class="g2">
+      <div class="panel">
+        <div class="stitle y">Impostos - R$ 96.875 (base R$750k)</div>
+        <table>
+          <thead><tr><th>Imposto</th><th class="r">Valor</th><th class="r">Alíquota</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text)">PIS</td><td class="r" style="color:var(--muted2)">R$4.875</td><td class="r" style="color:var(--muted2)">0,65%</td></tr>
+            <tr><td style="color:var(--text)">COFINS</td><td class="r" style="color:var(--yellow)">R$22.500</td><td class="r" style="color:var(--yellow)">3,00%</td></tr>
+            <tr><td style="color:var(--text)">ISS</td><td class="r" style="color:var(--orange)">R$37.500</td><td class="r" style="color:var(--orange)">5,00%</td></tr>
+            <tr><td style="color:var(--text)">DAS</td><td class="r" style="color:var(--red)">R$32.000</td><td class="r" style="color:var(--red)">16%</td></tr>
+            <tr style="background:var(--red-d)"><td style="font-weight:700;color:var(--text)">Total</td><td class="r" style="color:var(--red);font-weight:700">R$96.875</td><td class="r" style="color:var(--muted2)">~12,9%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="stitle r">Endividamento + Empréstimos</div>
+        <div style="font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:8px">ENDIVIDAMENTO - R$ 247.719</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-family:'Figtree',sans-serif;font-size:11px;"><span style="color:var(--muted2)">Impostos Lummen</span><span style="color:var(--red)">R$86.478</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-family:'Figtree',sans-serif;font-size:11px;"><span style="color:var(--muted2)">Impostos Nexxus</span><span style="color:var(--red)">R$120.152</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-family:'Figtree',sans-serif;font-size:11px;"><span style="color:var(--muted2)">Fornecedores</span><span style="color:var(--red)">R$41.090</span></div>
+        <div style="font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:1px;color:var(--muted);margin:12px 0 8px">EMPRÉSTIMOS - R$ 1.524.000</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-family:'Figtree',sans-serif;font-size:11px;"><span style="color:var(--muted2)">Wesley (52,5%)</span><span style="color:var(--red)">R$800.000</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-family:'Figtree',sans-serif;font-size:11px;"><span style="color:var(--muted2)">Carol (39,4%)</span><span style="color:var(--red)">R$600.000</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-family:'Figtree',sans-serif;font-size:11px;"><span style="color:var(--muted2)">Andre</span><span style="color:var(--red)">R$84.000</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-family:'Figtree',sans-serif;font-size:11px;"><span style="color:var(--muted2)">Leonard</span><span style="color:var(--red)">R$40.000</span></div>
+        <div class="alert r" style="margin-top:8px">⚠ Juros mensais R$13.600 - priorizar amortização estruturada.</div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-reducao">
+    <!-- Mission -->
+    <div style="background:var(--red-d);border:1px solid rgba(255,48,85,.2);border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
+      <div><div style="font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:3px">Estrutura atual</div><div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:28px;color:var(--red)">R$ 667.971</div></div>
+      <div style="font-family:'Figtree',sans-serif;font-size:20px;color:var(--muted)">→</div>
+      <div><div style="font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--yellow);text-transform:uppercase;margin-bottom:3px">Corte necessário</div><div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:28px;color:var(--yellow)">- R$ 117.971</div></div>
+      <div style="font-family:'Figtree',sans-serif;font-size:20px;color:var(--muted)">=</div>
+      <div><div style="font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:3px">Meta</div><div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:28px;color:var(--accent)">R$ 550.000</div></div>
+      <div style="font-family:'Figtree',sans-serif;font-size:20px;color:var(--muted)">→</div>
+      <div><div style="font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--blue);text-transform:uppercase;margin-bottom:3px">Novo BE (5%)</div><div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:28px;color:var(--blue)">R$ 11,0M</div></div>
+    </div>
+
+    <div class="g2 mb14">
+      <!-- Simulador de cortes -->
+      <div class="panel">
+        <div class="stitle r">Simulador de cortes</div>
+        <table class="cut-table">
+          <thead><tr><th>Linha</th><th class="r">Atual</th><th style="min-width:110px">Corte</th><th class="r">Novo</th><th class="r">−</th></tr></thead>
+          <tbody>
+            <!-- Diretoria bloqueada -->
+            <tr style="opacity:.5">
+              <td><div style="font-size:11px;font-weight:600;color:var(--text)">Diretoria</div><div style="font-size:9px;color:var(--accent)">✓ já executada</div></td>
+              <td class="r" style="color:var(--muted2);text-decoration:line-through">R$210k</td>
+              <td><input class="cut-slider locked" type="range" disabled value="35000" max="35000"><div style="font-size:9px;color:var(--accent);margin-top:2px">✓ −R$35.000</div><input type="hidden" id="r-sDir" value="0"></td>
+              <td class="r" style="color:var(--accent)">R$175k</td>
+              <td class="r" style="color:var(--muted2)">contabilizado</td>
+            </tr>
+            <tr>
+              <td><div style="font-size:11px;font-weight:600;color:var(--text)">Aluguel</div><div style="font-size:9px;color:var(--muted2)">renegociar</div></td>
+              <td class="r" style="color:var(--muted2)">R$70k</td>
+              <td><input class="cut-slider" type="range" id="r-sAlug" min="0" max="70000" step="2000" value="30000" oninput="calcReducao()"><div style="font-size:9px;color:var(--muted);margin-top:2px">corte: <span id="r-lblAlug">R$30.000</span></div></td>
+              <td class="r"><span id="r-vAlug">R$40k</span></td>
+              <td class="r" style="color:var(--accent)" id="r-eAlug">−R$30k</td>
+            </tr>
+            <tr>
+              <td><div style="font-size:11px;font-weight:600;color:var(--text)">Mão de obra</div><div style="font-size:9px;color:var(--muted2)">redistribuição</div></td>
+              <td class="r" style="color:var(--muted2)">R$211k</td>
+              <td><input class="cut-slider" type="range" id="r-sMO" min="0" max="211149" step="1000" value="25000" oninput="calcReducao()"><div style="font-size:9px;color:var(--muted);margin-top:2px">corte: <span id="r-lblMO">R$25.000</span></div></td>
+              <td class="r"><span id="r-vMO">R$186k</span></td>
+              <td class="r" style="color:var(--accent)" id="r-eMO">−R$25k</td>
+            </tr>
+            <tr>
+              <td><div style="font-size:11px;font-weight:600;color:var(--text)">Plataforma</div><div style="font-size:9px;color:var(--muted2)">revisar licenças</div></td>
+              <td class="r" style="color:var(--muted2)">R$56k</td>
+              <td><input class="cut-slider" type="range" id="r-sPlat" min="0" max="56235" step="1000" value="10000" oninput="calcReducao()"><div style="font-size:9px;color:var(--muted);margin-top:2px">corte: <span id="r-lblPlat">R$10.000</span></div></td>
+              <td class="r"><span id="r-vPlat">R$46k</span></td>
+              <td class="r" style="color:var(--accent)" id="r-ePlat">−R$10k</td>
+            </tr>
+            <tr>
+              <td><div style="font-size:11px;font-weight:600;color:var(--text)">Juros empréstimos</div><div style="font-size:9px;color:var(--muted2)">amortizar</div></td>
+              <td class="r" style="color:var(--muted2)">R$13,6k</td>
+              <td><input class="cut-slider" type="range" id="r-sJuros" min="0" max="13600" step="500" value="13600" oninput="calcReducao()"><div style="font-size:9px;color:var(--muted);margin-top:2px">corte: <span id="r-lblJuros">R$13.600</span></div></td>
+              <td class="r"><span id="r-vJuros">R$0</span></td>
+              <td class="r" style="color:var(--accent)" id="r-eJuros">−R$13,6k</td>
+            </tr>
+            <tr>
+              <td><div style="font-size:11px;font-weight:600;color:var(--text)">Despesas variáveis</div><div style="font-size:9px;color:var(--muted2)">cortes pontuais</div></td>
+              <td class="r" style="color:var(--muted2)">R$35k</td>
+              <td><input class="cut-slider" type="range" id="r-sDV" min="0" max="35217" step="500" value="15000" oninput="calcReducao()"><div style="font-size:9px;color:var(--muted);margin-top:2px">corte: <span id="r-lblDV">R$15.000</span></div></td>
+              <td class="r"><span id="r-vDV">R$20k</span></td>
+              <td class="r" style="color:var(--accent)" id="r-eDV">−R$15k</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border2);">
+              <td style="font-weight:700;color:var(--white);font-size:12px">TOTAL</td>
+              <td class="r" style="color:var(--red);font-weight:700">R$667k</td>
+              <td></td>
+              <td class="r" style="font-size:14px;font-weight:700" id="r-totalNovo">R$550k</td>
+              <td class="r" style="color:var(--accent);font-weight:700" id="r-totalEcon">−R$118k</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Resultado redução -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="panel">
+          <div class="stitle g">Resultado da reestruturação</div>
+          <div class="res-box">
+            <div class="res-row"><span class="rk">Meta</span><span class="rv g">R$ 550.000</span></div>
+            <div class="res-row"><span class="rk">Nova estrutura</span><span class="rv" id="r-resTotal">R$ 550.000</span></div>
+            <div class="res-row"><span class="rk">Diferença da meta</span><span class="rv" id="r-resDiff">✓ Meta atingida</span></div>
+            <div class="res-row"><span class="rk">Corte realizado</span><span class="rv g" id="r-resCorte">R$ 117.971</span></div>
+            <div class="res-row"><span class="rk">Economia anual</span><span class="rv g" id="r-resAnual">R$ 1,4M</span></div>
+            <div class="res-row"><span class="rk">Novo BE (5%)</span><span class="rv b" id="r-resBE">R$ 11,0M</span></div>
+          </div>
+          <!-- Gauge -->
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);margin-bottom:5px"><span>Atingimento da meta</span><span id="r-gaugePct">100%</span></div>
+            <div class="meter-track"><div class="meter-fill" id="r-gaugeFill" style="width:100%;background:var(--accent)"></div></div>
+          </div>
+          <div class="alert g" id="r-alert">✓ Meta atingida! Estrutura dentro do limite de R$550k.</div>
+        </div>
+
+        <!-- BE grid -->
+        <div class="panel" style="padding:16px">
+          <div class="stitle b">Breakeven por spread</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div class="be-card"><div class="be-spread">Spread 5%</div><div class="be-vol y" id="r-be5">R$11,0M</div><div class="be-lbl">era R$13,4M</div></div>
+            <div class="be-card highlight"><div class="be-spread">Spread 6,5%</div><div class="be-vol g" id="r-be65">R$8,5M</div><div class="be-lbl">era R$10,3M</div></div>
+            <div class="be-card"><div class="be-spread">Spread 7%</div><div class="be-vol g" id="r-be7">R$7,9M</div><div class="be-lbl">era R$9,5M</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="panel">
+      <div class="stitle y">Plano de execução - 90 dias</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-num">01</div><div class="tl-phase r">0–30 dias</div><div class="tl-txt">✓ Diretoria ajustada<br>Iniciar negociação aluguel<br>Auditar plataformas<br>Cortar despesas imediatas</div><div class="tl-saving r">Corte: −R$35k</div></div>
+        <div class="tl-item"><div class="tl-num">02</div><div class="tl-phase y">31–60 dias</div><div class="tl-txt">Fechar aluguel −R$30k<br>Cancelar licenças desnec.<br>Cortar despesas variáveis<br>Iniciar amortização</div><div class="tl-saving y">Acum.: −R$90k</div></div>
+        <div class="tl-item"><div class="tl-num">03</div><div class="tl-phase g">61–90 dias</div><div class="tl-txt">Ajuste equipe operacional<br>Eliminar juros 3ºs<br>Estrutura &lt;R$550k ✓<br>Breakeven R$11M atingido</div><div class="tl-saving g">Meta: −R$118k ✓</div></div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-historico">
+    <div class="g2 mb14">
+      <div class="panel">
+        <div class="stitle g">Performance histórica - Ago/25 → Fev/26</div>
+        <!-- Mini bar chart -->
+        <div style="display:flex;align-items:flex-end;gap:6px;height:80px;margin-bottom:12px" id="histChart"></div>
+        <table>
+          <thead><tr><th>Mês</th><th class="r">Base (R$)</th><th class="r">Resultado</th><th class="r">Marg.%</th><th class="r">Spread%</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text)">Ago/25</td><td class="r">2.119.475</td><td class="r">102.444</td><td class="r" style="color:var(--orange)">4,83%</td><td class="r" style="color:var(--orange)">5,72%</td></tr>
+            <tr><td style="color:var(--text)">Set/25</td><td class="r">10.017.826</td><td class="r">638.215</td><td class="r" style="color:var(--yellow)">6,37%</td><td class="r" style="color:var(--yellow)">7,05%</td></tr>
+            <tr><td style="color:var(--text)">Out/25</td><td class="r">6.473.096</td><td class="r">393.052</td><td class="r" style="color:var(--yellow)">6,07%</td><td class="r" style="color:var(--yellow)">7,71%</td></tr>
+            <tr><td style="color:var(--text)">Nov/25</td><td class="r">8.987.901</td><td class="r">726.700</td><td class="r" style="color:var(--accent)">8,09%</td><td class="r" style="color:var(--accent)">9,41%</td></tr>
+            <tr><td style="color:var(--text)">Dez/25</td><td class="r">1.776.176</td><td class="r">154.257</td><td class="r" style="color:var(--accent)">8,68%</td><td class="r" style="color:var(--accent)">9,77%</td></tr>
+            <tr><td style="color:var(--text)">Jan/26</td><td class="r">1.706.196</td><td class="r">121.004</td><td class="r" style="color:var(--yellow)">7,09%</td><td class="r" style="color:var(--yellow)">7,41%</td></tr>
+            <tr style="background:var(--red-d)"><td style="color:var(--white);font-weight:700">Fev/26 ◀</td><td class="r" style="font-weight:700">4.649.943</td><td class="r" style="font-weight:700">228.407</td><td class="r" style="color:var(--red);font-weight:700">4,91%</td><td class="r" style="color:var(--red);font-weight:700">5,69%</td></tr>
+          </tbody>
+        </table>
+        <div class="insight">
+          <div class="ins-lbl">Leitura estratégica</div>
+          <div class="ins-txt">Melhor fase: Nov–Dez/25 (8%+) · Margem hist. natural: 6,5–8% · 5% é conjuntural, não estrutural</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="stitle b">Pipeline Fev/26 - R$ 13,97M</div>
+        <table>
+          <thead><tr><th>Fase</th><th class="r">Valor</th><th class="r">%</th><th>Dist.</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text)">Análise em curso</td><td class="r" style="color:var(--blue)">R$3.702.586</td><td class="r" style="color:var(--muted2)">26%</td><td><div class="ph-bar"><div class="ph-fill" style="width:26%;background:var(--blue)"></div></div></td></tr>
+            <tr><td style="color:var(--text)">Pendência processual</td><td class="r" style="color:var(--red)">R$7.509.281</td><td class="r" style="color:var(--red)">54%</td><td><div class="ph-bar"><div class="ph-fill" style="width:54%;background:var(--red)"></div></div></td></tr>
+            <tr><td style="color:var(--text)">Pend. comercial</td><td class="r" style="color:var(--orange)">R$1.878.035</td><td class="r" style="color:var(--muted2)">13%</td><td><div class="ph-bar"><div class="ph-fill" style="width:13%;background:var(--orange)"></div></div></td></tr>
+            <tr><td style="color:var(--text)">Aguardando cessão</td><td class="r" style="color:var(--accent)">R$884.768</td><td class="r" style="color:var(--muted2)">6%</td><td><div class="ph-bar"><div class="ph-fill" style="width:6%;background:var(--accent)"></div></div></td></tr>
+          </tbody>
+        </table>
+        <div class="alert r">⚠ 54% em pendência processual - problema de giro, não de geração.</div>
+
+        <div style="margin-top:14px">
+          <div class="stitle y">Breakeven por cenário</div>
+          <table>
+            <thead><tr><th>Cenário</th><th class="r">Compras</th><th class="r">Receita</th><th class="r">Resultado</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--red)">Conv 8% | Spread 5%</td><td class="r">R$3,5M</td><td class="r">R$177k</td><td class="r" style="color:var(--red)">Déficit</td></tr>
+              <tr><td style="color:var(--yellow)">Conv 18% | Spread 5%</td><td class="r">R$7,8M</td><td class="r">R$393k</td><td class="r" style="color:var(--yellow)">Déficit</td></tr>
+              <tr><td style="color:var(--accent)">R$12M | Spread 7,5%</td><td class="r">R$12M</td><td class="r">R$900k</td><td class="r" style="color:var(--accent)">+R$249k</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-comercial">
+    <div class="g4 mb14">
+      <div class="kpi r"><div class="kpi-lbl">Conversão atual</div><div class="kpi-val">8,13%</div><div class="kpi-sub">base 1.709 leads</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Meta mín. 90d</div><div class="kpi-val">12%</div><div class="kpi-sub">piso obrigatório</div></div>
+      <div class="kpi g"><div class="kpi-lbl">Meta 180d</div><div class="kpi-val">15%</div><div class="kpi-sub">alta performance</div></div>
+      <div class="kpi b"><div class="kpi-lbl">Potencial oculto</div><div class="kpi-val">+R$13,2M</div><div class="kpi-sub">sem contratar ninguém</div></div>
+    </div>
+
+    <div class="g2 mb14">
+      <div class="panel">
+        <div class="stitle r">Conversão por vendedor - Fev/26</div>
+        <div style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2);margin-bottom:10px">Base: 1.709 · Convertidos: 139 · Média: <span style="color:var(--red)">8,13%</span> · Mínimo estratégico: <span style="color:var(--yellow)">12%</span></div>
+        <table>
+          <thead><tr><th>Vendedor</th><th class="r">Conv.</th><th style="min-width:100px">Barra</th><th>Status</th></tr></thead>
+          <tbody id="vendBody"></tbody>
+        </table>
+        <div class="insight" style="margin-top:10px">
+          <div class="ins-lbl">Regras operacionais 2026</div>
+          <div class="ins-txt">Nenhum vendedor abaixo de 8% · Piso 10% em 60 dias · Top performers: 15%+</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="stitle y">Capacidade operacional vs necessária</div>
+        <table>
+          <thead><tr><th>Indicador</th><th class="r">Atual</th><th class="r">Ideal</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text)">Leads/dia total</td><td class="r" style="color:var(--red)">28</td><td class="r" style="color:var(--accent)">43</td></tr>
+            <tr><td style="color:var(--text)">Leads/dia por vendedor</td><td class="r" style="color:var(--red)">2,8</td><td class="r" style="color:var(--accent)">4–5</td></tr>
+            <tr><td style="color:var(--text)">% estoque trabalhado</td><td class="r" style="color:var(--red)">10%</td><td class="r" style="color:var(--accent)">30%</td></tr>
+            <tr><td style="color:var(--text)">Giro mensal estoque</td><td class="r" style="color:var(--yellow)">50%</td><td class="r" style="color:var(--accent)">80–90%</td></tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:14px">
+          <div class="stitle b">Impacto financeiro - elevar conversão</div>
+          <div class="res-box">
+            <div class="res-row"><span class="rk">Conversão 8,13% → 12%</span><span class="rv g">+66 intenções</span></div>
+            <div class="res-row"><span class="rk">Potencial em compras</span><span class="rv g">+R$13,2M</span></div>
+            <div class="res-row"><span class="rk">Custo adicional</span><span class="rv g">R$ 0</span></div>
+            <div class="res-row"><span class="rk">Decisão estratégica</span><span class="rv y">Eficiência antes de expansão</span></div>
+          </div>
+        </div>
+
+        <div class="insight" style="margin-top:10px">
+          <div class="ins-lbl">Diagnóstico executivo</div>
+          <div class="ins-txt">
+            ✔ Problema não é geração de lead<br>
+            ✔ Problema não é falta de base<br>
+            ✔ Problema é eficiência individual<br>
+            → Extrair eficiência antes de expandir estrutura
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-op-leads">
+    <div class="g4 mb14">
+      <div class="kpi b"><div class="kpi-lbl">Estoque total</div><div class="kpi-val">1.439</div><div class="kpi-sub">leads ativos</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Leads/dia atual</div><div class="kpi-val">28</div><div class="kpi-sub">meta: 43/dia</div></div>
+      <div class="kpi r"><div class="kpi-lbl">% estoque ativado</div><div class="kpi-val">9,7%</div><div class="kpi-sub">meta: 30%</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Atividades/dia</div><div class="kpi-val">140</div><div class="kpi-sub">meta: 432</div></div>
+    </div>
+    <div class="g2 mb14">
+      <div class="panel">
+        <div class="stitle b">Leads por vendedor - Fev/26</div>
+        <table>
+          <thead><tr><th>Vendedor</th><th class="r">Estoque</th><th class="r">Lead</th><th class="r">Conexão</th><th class="r">Diagn.</th><th>Funil</th></tr></thead>
+          <tbody>
+            <tr><td>Mariana Balbino</td><td class="r">175</td><td class="r" style="color:var(--blue)">128</td><td class="r" style="color:var(--yellow)">46</td><td class="r" style="color:var(--accent)">1</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:44px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:16px;background:var(--yellow);border-radius:2px"></div></div></td></tr>
+            <tr><td>Caue Oliveira</td><td class="r">173</td><td class="r" style="color:var(--blue)">143</td><td class="r" style="color:var(--yellow)">30</td><td class="r" style="color:var(--accent)">0</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:50px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:10px;background:var(--yellow);border-radius:2px"></div></div></td></tr>
+            <tr><td>Gabriel Henrique</td><td class="r">165</td><td class="r" style="color:var(--blue)">117</td><td class="r" style="color:var(--yellow)">48</td><td class="r" style="color:var(--red)">0</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:43px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:17px;background:var(--yellow);border-radius:2px"></div></div></td></tr>
+            <tr><td>Isadora Santos</td><td class="r">160</td><td class="r" style="color:var(--blue)">150</td><td class="r" style="color:var(--yellow)">10</td><td class="r" style="color:var(--red)">0</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:56px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:4px;background:var(--yellow);border-radius:2px"></div></div></td></tr>
+            <tr><td>Natália Travaglia</td><td class="r">145</td><td class="r" style="color:var(--blue)">108</td><td class="r" style="color:var(--yellow)">37</td><td class="r" style="color:var(--red)">0</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:45px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:15px;background:var(--yellow);border-radius:2px"></div></div></td></tr>
+            <tr><td>Frank R. Zacarias</td><td class="r">141</td><td class="r" style="color:var(--blue)">105</td><td class="r" style="color:var(--yellow)">32</td><td class="r" style="color:var(--accent)">4</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:45px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:14px;background:var(--yellow);border-radius:2px"></div><div style="height:5px;width:2px;background:var(--accent);border-radius:2px"></div></div></td></tr>
+            <tr><td>Sandra Oliveira</td><td class="r">134</td><td class="r" style="color:var(--blue)">92</td><td class="r" style="color:var(--yellow)">42</td><td class="r" style="color:var(--red)">0</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:41px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:19px;background:var(--yellow);border-radius:2px"></div></div></td></tr>
+            <tr><td>Luiz Neto</td><td class="r">132</td><td class="r" style="color:var(--blue)">64</td><td class="r" style="color:var(--yellow)">61</td><td class="r" style="color:var(--accent)">7</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:29px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:28px;background:var(--yellow);border-radius:2px"></div><div style="height:5px;width:3px;background:var(--accent);border-radius:2px"></div></div></td></tr>
+            <tr><td>Julia Silva</td><td class="r">117</td><td class="r" style="color:var(--blue)">99</td><td class="r" style="color:var(--yellow)">18</td><td class="r" style="color:var(--accent)">0</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:51px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:9px;background:var(--yellow);border-radius:2px"></div></div></td></tr>
+            <tr><td>Vanilda Santos</td><td class="r">97</td><td class="r" style="color:var(--blue)">57</td><td class="r" style="color:var(--yellow)">38</td><td class="r" style="color:var(--accent)">2</td><td><div style="display:flex;gap:2px"><div style="height:5px;width:35px;background:var(--blue);border-radius:2px"></div><div style="height:5px;width:23px;background:var(--yellow);border-radius:2px"></div></div></td></tr>
+            <tr style="background:var(--blue-d)"><td style="font-weight:700">Totais</td><td class="r" style="font-weight:700">1.439</td><td class="r" style="color:var(--blue);font-weight:700">1.063</td><td class="r" style="color:var(--yellow);font-weight:700">362</td><td class="r" style="color:var(--accent);font-weight:700">14</td><td></td></tr>
+          </tbody>
+        </table>
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;background:var(--blue);border-radius:2px"></div><span style="font-size:10px;color:var(--muted2)">Lead</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;background:var(--yellow);border-radius:2px"></div><span style="font-size:10px;color:var(--muted2)">Conexão</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;background:var(--accent);border-radius:2px"></div><span style="font-size:10px;color:var(--muted2)">Diagnóstico</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="stitle y">Cenário de ativação de leads</div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Leads/dia por vendedor</span><span class="sl-val" style="color:var(--accent)" id="l-vLpd">4,3</span></div>
+          <input type="range" class="b" id="l-sLpd" min="1" max="10" step="0.1" value="4.3" oninput="calcLeads()">
+          <div class="sl-hints"><span>1</span><span style="color:var(--red)">Atual: 2,8</span><span style="color:var(--yellow)">Mín: 4</span><span style="color:var(--accent)">Ideal: 5</span><span>10</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Dias úteis/mês</span><span class="sl-val" style="color:var(--yellow)" id="l-vDu">20</span></div>
+          <input type="range" class="y" id="l-sDu" min="15" max="23" step="1" value="20" oninput="calcLeads()">
+          <div class="sl-hints"><span>15</span><span>20</span><span>23</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Nº de vendedores</span><span class="sl-val" style="color:var(--blue)" id="l-vNv">10</span></div>
+          <input type="range" class="b" id="l-sNv" min="5" max="20" step="1" value="10" oninput="calcLeads()">
+          <div class="sl-hints"><span>5</span><span style="color:var(--yellow)">Atual: 10</span><span>20</span></div>
+        </div>
+        <div class="res-box" style="margin-top:12px">
+          <div class="res-row"><span class="rk">Leads/dia total</span><span class="rv b" id="l-rLdt">43</span></div>
+          <div class="res-row"><span class="rk">Leads/mês total</span><span class="rv b" id="l-rLmt">860</span></div>
+          <div class="res-row"><span class="rk">% estoque ativado</span><span class="rv" id="l-rPct">59,8%</span></div>
+          <div class="res-row"><span class="rk">Giro do estoque</span><span class="rv" id="l-rGiro">-</span></div>
+        </div>
+        <div class="alert g" id="l-alert" style="margin-top:10px">Calculando...</div>
+        <div class="insight" style="margin-top:10px">
+          <div class="ins-lbl">Diagnóstico</div>
+          <div class="ins-txt">140 contatos/dia mas apenas 9,7% do estoque ativado.<br>Problema não é volume - é direcionamento.<br>Meta: 4–5 leads novos por vendedor/dia.</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:var(--red-d);border:1px solid rgba(255,48,85,.2);border-radius:8px;padding:14px">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:6px">Cenário Atual</div>
+        <div style="font-size:11px;color:var(--muted2);line-height:1.8">Leads/dia: <strong style="color:var(--red)">28</strong> | Atividades/dia: <strong style="color:var(--red)">140</strong><br>% estoque: <strong style="color:var(--red)">9,7%</strong> | Giro: <strong style="color:var(--red)">50%</strong></div>
+      </div>
+      <div style="background:var(--accent-d);border:1px solid rgba(0,212,160,.2);border-radius:8px;padding:14px">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Cenário Necessário</div>
+        <div style="font-size:11px;color:var(--muted2);line-height:1.8">Leads/dia: <strong style="color:var(--accent)">43</strong> | Atividades/dia: <strong style="color:var(--accent)">432</strong><br>% estoque: <strong style="color:var(--accent)">30%</strong> | Giro: <strong style="color:var(--accent)">80–90%</strong></div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-op-conversao">
+    <div class="g4 mb14">
+      <div class="kpi r"><div class="kpi-lbl">Conversão média</div><div class="kpi-val">8,13%</div><div class="kpi-sub">meta mín: 12%</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Abaixo do mínimo</div><div class="kpi-val">7/10</div><div class="kpi-sub">vendedores &lt;12%</div></div>
+      <div class="kpi g"><div class="kpi-lbl">Potencial oculto</div><div class="kpi-val">+R$13,2M</div><div class="kpi-sub">sem contratar</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Gap para meta</div><div class="kpi-val">3,87 p.p.</div><div class="kpi-sub">8,13% → 12%</div></div>
+    </div>
+    <div class="g2 mb14">
+      <div class="panel">
+        <div class="stitle r">Conversão por vendedor - Fev/26</div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+          <span class="pill g">Alta ≥12%</span><span class="pill y">Média 7–11%</span><span class="pill o">Baixa 5–6%</span><span class="pill r">Crítico &lt;5%</span>
+        </div>
+        <table>
+          <thead><tr><th>Vendedor</th><th class="r">Base</th><th class="r">Conv.</th><th class="r">%</th><th>Trend</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Julia Silva</td><td class="r">162</td><td class="r" style="color:var(--accent)">26</td><td class="r" style="color:var(--accent);font-weight:700">16,05%</td><td style="font-size:9px;color:var(--muted2)">24%→11%→14%→8%</td><td><span class="pill g">ALTA</span></td></tr>
+            <tr><td>Caue Oliveira</td><td class="r">165</td><td class="r" style="color:var(--accent)">23</td><td class="r" style="color:var(--accent);font-weight:700">13,94%</td><td style="font-size:9px;color:var(--muted2)">16%→17%→15%→11%</td><td><span class="pill g">ALTA</span></td></tr>
+            <tr><td>Frank R. Zacarias</td><td class="r">168</td><td class="r" style="color:var(--accent)">19</td><td class="r" style="color:var(--accent);font-weight:700">11,31%</td><td style="font-size:9px;color:var(--muted2)">16%→17%→8%→5%</td><td><span class="pill g">ALTA</span></td></tr>
+            <tr><td>Natália Travaglia</td><td class="r">135</td><td class="r" style="color:var(--yellow)">12</td><td class="r" style="color:var(--yellow);font-weight:700">8,89%</td><td style="font-size:9px;color:var(--muted2)">13%→7%→10%→4%</td><td><span class="pill y">MÉDIA</span></td></tr>
+            <tr><td>Luiz Neto</td><td class="r">212</td><td class="r" style="color:var(--yellow)">17</td><td class="r" style="color:var(--yellow);font-weight:700">8,02%</td><td style="font-size:9px;color:var(--muted2)">7%→13%→8%→6%</td><td><span class="pill y">MÉDIA</span></td></tr>
+            <tr><td>Mariana Balbino</td><td class="r">156</td><td class="r" style="color:var(--yellow)">12</td><td class="r" style="color:var(--yellow);font-weight:700">7,69%</td><td style="font-size:9px;color:var(--muted2)">8%→8%→9%→5%</td><td><span class="pill y">MÉDIA</span></td></tr>
+            <tr><td>Vanilda Santos</td><td class="r">196</td><td class="r" style="color:var(--orange)">11</td><td class="r" style="color:var(--orange);font-weight:700">5,61%</td><td style="font-size:9px;color:var(--muted2)">4%→11%→7%→2%</td><td><span class="pill o">BAIXA</span></td></tr>
+            <tr><td>Sandra Oliveira</td><td class="r">198</td><td class="r" style="color:var(--orange)">10</td><td class="r" style="color:var(--orange);font-weight:700">5,05%</td><td style="font-size:9px;color:var(--muted2)">6%→5%→6%→2%</td><td><span class="pill o">BAIXA</span></td></tr>
+            <tr><td>Isadora Santos</td><td class="r">127</td><td class="r" style="color:var(--orange)">6</td><td class="r" style="color:var(--orange);font-weight:700">4,72%</td><td style="font-size:9px;color:var(--muted2)">10%→4%→3%→0%</td><td><span class="pill o">BAIXA</span></td></tr>
+            <tr><td>Gabriel Henrique</td><td class="r">190</td><td class="r" style="color:var(--red)">3</td><td class="r" style="color:var(--red);font-weight:700">1,58%</td><td style="font-size:9px;color:var(--muted2)">3%→0%→2%→0%</td><td><span class="pill r">CRÍTICO</span></td></tr>
+            <tr style="background:var(--blue-d)"><td style="font-weight:700">Total</td><td class="r" style="font-weight:700">1.709</td><td class="r" style="color:var(--blue);font-weight:700">139</td><td class="r" style="color:var(--blue);font-weight:700">8,13%</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="stitle g">Simulador de conversão</div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Meta de conversão (%)</span><span class="sl-val" style="color:var(--accent)" id="cv-vMeta">12,0%</span></div>
+          <input type="range" class="b" id="cv-sMeta" min="8" max="25" step="0.5" value="12" oninput="calcConversao()">
+          <div class="sl-hints"><span>8%</span><span style="color:var(--red)">Atual: 8,13%</span><span style="color:var(--yellow)">Mín: 12%</span><span style="color:var(--accent)">Meta: 18%</span><span>25%</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Base total (leads)</span><span class="sl-val" style="color:var(--yellow)" id="cv-vBase">1.709</span></div>
+          <input type="range" class="y" id="cv-sBase" min="1000" max="3000" step="50" value="1709" oninput="calcConversao()">
+          <div class="sl-hints"><span>1.000</span><span style="color:var(--yellow)">Atual: 1.709</span><span>3.000</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Ticket médio (R$k)</span><span class="sl-val" style="color:var(--blue)" id="cv-vTick">200</span></div>
+          <input type="range" class="b" id="cv-sTick" min="50" max="500" step="10" value="200" oninput="calcConversao()">
+          <div class="sl-hints"><span>R$50k</span><span style="color:var(--yellow)">Hist: R$180k</span><span style="color:var(--accent)">Meta: R$200k</span><span>R$500k</span></div>
+        </div>
+        <div class="res-box" style="margin-top:12px">
+          <div class="res-row"><span class="rk">Intenções geradas</span><span class="rv b" id="cv-rInt">-</span></div>
+          <div class="res-row"><span class="rk">vs atual (139)</span><span class="rv" id="cv-rDiff">-</span></div>
+          <div class="res-row"><span class="rk">Volume compras</span><span class="rv g" id="cv-rVol">-</span></div>
+          <div class="res-row"><span class="rk">Receita estimada (5%)</span><span class="rv g" id="cv-rRec">-</span></div>
+          <div class="res-row"><span class="rk">Receita estimada (7%)</span><span class="rv g" id="cv-rRec7">-</span></div>
+        </div>
+        <div class="alert g" id="cv-alert" style="margin-top:10px">Calculando...</div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-op-negociacao">
+    <div class="g4 mb14">
+      <div class="kpi r"><div class="kpi-lbl">Na meta</div><div class="kpi-val">1/10</div><div class="kpi-sub">só Caue Oliveira</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Em alerta</div><div class="kpi-val">2/10</div><div class="kpi-sub">Frank + Luiz</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Intervenção direta</div><div class="kpi-val">7/10</div><div class="kpi-sub">ação imediata</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Ratio desc./intenção</div><div class="kpi-val">28:1</div><div class="kpi-sub">543 desc / 19 int.</div></div>
+    </div>
+    <div class="g2 mb14">
+      <div class="panel">
+        <div class="stitle b">Status por vendedor - meta: 30 ativos</div>
+        <table>
+          <thead><tr><th>Vendedor</th><th class="r">Prop.</th><th class="r">Neg.</th><th class="r">Total</th><th class="r">Gap</th><th class="r">Intenç.</th><th class="r">Desc.</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Caue Oliveira</td><td class="r" style="color:var(--yellow)">21</td><td class="r" style="color:var(--blue)">7</td><td class="r" style="font-weight:700">28</td><td class="r" style="color:var(--yellow)">−2</td><td class="r" style="color:var(--accent)">6</td><td class="r" style="color:var(--muted2)">33</td><td><span class="pill g">NA META</span></td></tr>
+            <tr><td>Frank R. Zacarias</td><td class="r" style="color:var(--yellow)">6</td><td class="r" style="color:var(--blue)">11</td><td class="r" style="font-weight:700">17</td><td class="r" style="color:var(--orange)">−13</td><td class="r" style="color:var(--yellow)">3</td><td class="r" style="color:var(--muted2)">57</td><td><span class="pill y">ALERTA</span></td></tr>
+            <tr><td>Luiz Neto</td><td class="r" style="color:var(--yellow)">17</td><td class="r" style="color:var(--blue)">6</td><td class="r" style="font-weight:700">23</td><td class="r" style="color:var(--orange)">−7</td><td class="r" style="color:var(--yellow)">4</td><td class="r" style="color:var(--muted2)">73</td><td><span class="pill y">ALERTA</span></td></tr>
+            <tr><td>Isadora Santos</td><td class="r" style="color:var(--yellow)">14</td><td class="r" style="color:var(--blue)">4</td><td class="r" style="font-weight:700">18</td><td class="r" style="color:var(--red)">−12</td><td class="r" style="color:var(--red)">0</td><td class="r" style="color:var(--muted2)">32</td><td><span class="pill r">INTERVENÇÃO</span></td></tr>
+            <tr><td>Sandra Oliveira</td><td class="r" style="color:var(--yellow)">10</td><td class="r" style="color:var(--blue)">5</td><td class="r" style="font-weight:700">15</td><td class="r" style="color:var(--red)">−15</td><td class="r" style="color:var(--red)">1</td><td class="r" style="color:var(--red)">77</td><td><span class="pill r">INTERVENÇÃO</span></td></tr>
+            <tr><td>Vanilda Santos</td><td class="r" style="color:var(--yellow)">8</td><td class="r" style="color:var(--blue)">7</td><td class="r" style="font-weight:700">15</td><td class="r" style="color:var(--red)">−15</td><td class="r" style="color:var(--red)">1</td><td class="r" style="color:var(--red)">76</td><td><span class="pill r">INTERVENÇÃO</span></td></tr>
+            <tr><td>Mariana Balbino</td><td class="r" style="color:var(--yellow)">9</td><td class="r" style="color:var(--blue)">3</td><td class="r" style="font-weight:700">12</td><td class="r" style="color:var(--red)">−18</td><td class="r" style="color:var(--red)">1</td><td class="r" style="color:var(--muted2)">39</td><td><span class="pill r">INTERVENÇÃO</span></td></tr>
+            <tr><td>Gabriel Henrique</td><td class="r" style="color:var(--yellow)">4</td><td class="r" style="color:var(--blue)">8</td><td class="r" style="font-weight:700">12</td><td class="r" style="color:var(--red)">−18</td><td class="r" style="color:var(--red)">0</td><td class="r" style="color:var(--muted2)">41</td><td><span class="pill r">INTERVENÇÃO</span></td></tr>
+            <tr><td>Natália Travaglia</td><td class="r" style="color:var(--yellow)">8</td><td class="r" style="color:var(--blue)">1</td><td class="r" style="font-weight:700">9</td><td class="r" style="color:var(--red)">−21</td><td class="r" style="color:var(--red)">1</td><td class="r" style="color:var(--red)">51</td><td><span class="pill r">INTERVENÇÃO</span></td></tr>
+            <tr><td>Julia Silva</td><td class="r" style="color:var(--yellow)">5</td><td class="r" style="color:var(--blue)">0</td><td class="r" style="font-weight:700">5</td><td class="r" style="color:var(--red)">−25</td><td class="r" style="color:var(--red)">2</td><td class="r" style="color:var(--red)">64</td><td><span class="pill r">INTERVENÇÃO</span></td></tr>
+            <tr style="background:var(--blue-d)"><td style="font-weight:700">Totais</td><td class="r" style="color:var(--yellow);font-weight:700">102</td><td class="r" style="color:var(--blue);font-weight:700">52</td><td class="r" style="font-weight:700;font-size:13px">154</td><td class="r" style="color:var(--red);font-weight:700">−146</td><td class="r" style="color:var(--accent);font-weight:700">19</td><td class="r" style="color:var(--red);font-weight:700">543</td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="alert r" style="margin-top:10px">🚨 543 descartes vs 19 intenções - ratio 1:28. Meta saudável: 1:5 a 1:8.</div>
+      </div>
+      <div class="panel">
+        <div class="stitle y">Simulador de negociação</div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Ativos por vendedor (meta)</span><span class="sl-val" style="color:var(--accent)" id="ng-vAtv">30</span></div>
+          <input type="range" class="b" id="ng-sAtv" min="10" max="50" step="1" value="30" oninput="calcNeg()">
+          <div class="sl-hints"><span>10</span><span style="color:var(--red)">Atual: ~15</span><span style="color:var(--accent)">Meta: 30</span><span>50</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Taxa de intenção (%)</span><span class="sl-val" style="color:var(--yellow)" id="ng-vTxi">18</span></div>
+          <input type="range" class="y" id="ng-sTxi" min="5" max="35" step="1" value="18" oninput="calcNeg()">
+          <div class="sl-hints"><span>5%</span><span style="color:var(--red)">Atual: 1,19%</span><span style="color:var(--yellow)">Mín: 12%</span><span style="color:var(--accent)">Meta: 18%</span><span>35%</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Ticket médio (R$k)</span><span class="sl-val" style="color:var(--blue)" id="ng-vTick">180</span></div>
+          <input type="range" class="b" id="ng-sTick" min="50" max="500" step="10" value="180" oninput="calcNeg()">
+          <div class="sl-hints"><span>R$50k</span><span style="color:var(--yellow)">Atual: R$25k</span><span style="color:var(--accent)">Meta: R$180k</span><span>R$500k</span></div>
+        </div>
+        <div class="res-box" style="margin-top:12px">
+          <div class="res-row"><span class="rk">Total ativos no funil</span><span class="rv b" id="ng-rTot">300</span></div>
+          <div class="res-row"><span class="rk">Intenções/mês</span><span class="rv g" id="ng-rInt">54</span></div>
+          <div class="res-row"><span class="rk">Volume compras</span><span class="rv g" id="ng-rVol">R$9,7M</span></div>
+          <div class="res-row"><span class="rk">Receita est. (5%)</span><span class="rv g" id="ng-rRec">R$486k</span></div>
+          <div class="res-row"><span class="rk">Descarte máx. (40%)</span><span class="rv y" id="ng-rDesc">120</span></div>
+        </div>
+        <div class="alert g" id="ng-alert" style="margin-top:10px">Calculando...</div>
+        <div class="res-box" style="margin-top:10px">
+          <div class="res-row"><span class="rk">Metas operacionais</span><span class="rv y">Referência</span></div>
+          <div class="res-row"><span class="rk">Intenções/mês mín.</span><span class="rv g">6 mín / 8 ideal</span></div>
+          <div class="res-row"><span class="rk">Conversão ativa</span><span class="rv y">≥ 18%</span></div>
+          <div class="res-row"><span class="rk">Spread médio</span><span class="rv y">≥ 7%</span></div>
+          <div class="res-row"><span class="rk">Ativação estoque</span><span class="rv g">25% → 30%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-op-pipeline">
+    <div class="g4 mb14">
+      <div class="kpi b"><div class="kpi-lbl">Pipeline total</div><div class="kpi-val">R$43,6M</div><div class="kpi-sub">3,6× meta mensal</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Negociação</div><div class="kpi-val">R$10,9M</div><div class="kpi-sub">25% do total</div></div>
+      <div class="kpi b"><div class="kpi-lbl">Proposta enviada</div><div class="kpi-val">R$32,7M</div><div class="kpi-sub">75% do total</div></div>
+      <div class="kpi g"><div class="kpi-lbl">Receita est. (5%)</div><div class="kpi-val">R$2,18M</div><div class="kpi-sub">spread 5%</div></div>
+    </div>
+    <div class="g2 mb14">
+      <div class="panel">
+        <div class="stitle b">Pipeline por vendedor</div>
+        <table>
+          <thead><tr><th>Vendedor</th><th class="r">Negociação</th><th class="r">Proposta</th><th class="r">Total</th><th>Dist.</th></tr></thead>
+          <tbody>
+            <tr><td>Tainá Santana</td><td class="r" style="color:var(--muted2)">-</td><td class="r" style="color:var(--yellow)">R$8,1M</td><td class="r" style="font-weight:700">R$8,1M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:18.6%;background:var(--blue)"></div></div></td></tr>
+            <tr><td>Frank R. Zacarias</td><td class="r" style="color:var(--blue)">R$1,4M</td><td class="r" style="color:var(--yellow)">R$2,9M</td><td class="r" style="font-weight:700">R$4,4M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:10%;background:var(--blue)"></div></div></td></tr>
+            <tr><td>Gabriel Henrique</td><td class="r" style="color:var(--blue)">R$2,6M</td><td class="r" style="color:var(--yellow)">R$1,1M</td><td class="r" style="font-weight:700">R$3,7M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:8.5%;background:var(--blue)"></div></div></td></tr>
+            <tr><td>LUMMEN ATIVOS</td><td class="r" style="color:var(--muted2)">-</td><td class="r" style="color:var(--yellow)">R$3,1M</td><td class="r" style="font-weight:700">R$3,1M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:7.1%;background:var(--purple)"></div></div></td></tr>
+            <tr><td>Isadora Santos</td><td class="r" style="color:var(--blue)">R$0,7M</td><td class="r" style="color:var(--yellow)">R$2,6M</td><td class="r" style="font-weight:700">R$3,3M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:7.7%;background:var(--blue)"></div></div></td></tr>
+            <tr><td>Luiz Neto</td><td class="r" style="color:var(--blue)">R$0,8M</td><td class="r" style="color:var(--yellow)">R$2,8M</td><td class="r" style="font-weight:700">R$3,6M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:8.3%;background:var(--blue)"></div></div></td></tr>
+            <tr><td>Stefhane Santos</td><td class="r" style="color:var(--blue)">R$2,2M</td><td class="r" style="color:var(--yellow)">R$1,1M</td><td class="r" style="font-weight:700">R$3,3M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:7.6%;background:var(--blue)"></div></div></td></tr>
+            <tr><td>Caue Oliveira</td><td class="r" style="color:var(--blue)">R$1,2M</td><td class="r" style="color:var(--yellow)">R$0,8M</td><td class="r" style="font-weight:700">R$2,0M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:4.6%;background:var(--blue)"></div></div></td></tr>
+            <tr><td>Mariana Balbino</td><td class="r" style="color:var(--blue)">R$0,5M</td><td class="r" style="color:var(--yellow)">R$2,5M</td><td class="r" style="font-weight:700">R$3,0M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:6.9%;background:var(--blue)"></div></div></td></tr>
+            <tr><td>Outros</td><td class="r" style="color:var(--muted2)">R$1,0M</td><td class="r" style="color:var(--yellow)">R$4,3M</td><td class="r" style="font-weight:700">R$5,3M</td><td><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:12%;background:var(--muted)"></div></div></td></tr>
+            <tr style="background:var(--blue-d)"><td style="font-weight:700">Total Geral</td><td class="r" style="color:var(--blue);font-weight:700">R$10,9M</td><td class="r" style="color:var(--yellow);font-weight:700">R$32,7M</td><td class="r" style="font-weight:700;font-size:13px">R$43,6M</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="stitle g">Simulador de pipeline</div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">% pipeline convertido/mês</span><span class="sl-val" style="color:var(--accent)" id="pp-vPct">27%</span></div>
+          <input type="range" class="b" id="pp-sPct" min="5" max="60" step="1" value="27" oninput="calcPipeline()">
+          <div class="sl-hints"><span>5%</span><span style="color:var(--red)">Atual: ~11%</span><span style="color:var(--yellow)">Meta: 27%</span><span>60%</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Spread médio (%)</span><span class="sl-val" style="color:var(--yellow)" id="pp-vSp">5</span></div>
+          <input type="range" class="y" id="pp-sSp" min="3" max="12" step="0.5" value="5" oninput="calcPipeline()">
+          <div class="sl-hints"><span>3%</span><span style="color:var(--red)">Atual: 5%</span><span style="color:var(--accent)">Meta: 7%</span><span>12%</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Pipeline total (R$M)</span><span class="sl-val" style="color:var(--blue)" id="pp-vPip">43,6</span></div>
+          <input type="range" class="b" id="pp-sPip" min="10" max="80" step="1" value="43.6" oninput="calcPipeline()">
+          <div class="sl-hints"><span>R$10M</span><span style="color:var(--yellow)">Atual: R$43,6M</span><span style="color:var(--accent)">Meta: R$60M</span><span>R$80M</span></div>
+        </div>
+        <div class="res-box" style="margin-top:12px">
+          <div class="res-row"><span class="rk">Compras/mês</span><span class="rv b" id="pp-rComp">-</span></div>
+          <div class="res-row"><span class="rk">Receita bruta</span><span class="rv g" id="pp-rRec">-</span></div>
+          <div class="res-row"><span class="rk">vs meta R$12M</span><span class="rv" id="pp-rMeta">-</span></div>
+          <div class="res-row"><span class="rk">Resultado op. (c/ R$550k est.)</span><span class="rv" id="pp-rRes">-</span></div>
+        </div>
+        <div class="alert g" id="pp-alert" style="margin-top:10px">Calculando...</div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-op-receita">
+    <div class="g4 mb14">
+      <div class="kpi b"><div class="kpi-lbl">Ativos em trânsito</div><div class="kpi-val">R$13,97M</div><div class="kpi-sub">30 ativos</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Pend. processual</div><div class="kpi-val">53,7%</div><div class="kpi-sub">R$7,5M travado</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Reprovados</div><div class="kpi-val">44%</div><div class="kpi-sub">R$218k perdido</div></div>
+      <div class="kpi g"><div class="kpi-lbl">Rec. estimada total</div><div class="kpi-val">R$698k</div><div class="kpi-sub">spread 5%</div></div>
+    </div>
+    <div class="g2 mb14">
+      <div class="panel">
+        <div class="stitle b">Ativos em trânsito - R$13.974.671</div>
+        <table>
+          <thead><tr><th>Fluxo</th><th class="r">Valor</th><th class="r">%</th><th class="r">Ativos</th><th class="r">Motivo</th><th class="r">Rec. Est.</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text)">Análise em curso</td><td class="r" style="color:var(--blue)">R$3.702.586</td><td class="r">26,5%</td><td class="r">8</td><td style="font-size:9px;color:var(--muted2)">Custo do SLA</td><td class="r" style="color:var(--blue)">R$185.129</td></tr>
+            <tr><td style="color:var(--text)">Pendência processual</td><td class="r" style="color:var(--red)">R$7.509.281</td><td class="r" style="color:var(--red)">53,7%</td><td class="r">22</td><td style="font-size:9px;color:var(--muted2)">Análise jurídica</td><td class="r" style="color:var(--red)">R$375.464</td></tr>
+            <tr><td style="color:var(--text)">Pendência comercial</td><td class="r" style="color:var(--orange)">R$1.878.035</td><td class="r">13,4%</td><td class="r">-</td><td style="font-size:9px;color:var(--muted2)">Processo Comercial</td><td class="r" style="color:var(--orange)">R$93.902</td></tr>
+            <tr><td style="color:var(--text)">Aguardando cessão</td><td class="r" style="color:var(--yellow)">R$884.768</td><td class="r">6,3%</td><td class="r">-</td><td style="font-size:9px;color:var(--muted2)">Falta recurso</td><td class="r" style="color:var(--yellow)">R$44.238</td></tr>
+            <tr style="background:var(--blue-d)"><td style="font-weight:700">Total</td><td class="r" style="font-weight:700">R$13.974.671</td><td class="r">100%</td><td class="r" style="font-weight:700">30</td><td></td><td class="r" style="color:var(--accent);font-weight:700">R$698.733</td></tr>
+          </tbody>
+        </table>
+        <div class="alert r" style="margin-top:10px">⚠ R$7,5M travado em pendência processual (53,7%). Reduzir para ≤40% libera ~R$1,9M de giro.</div>
+
+        <div style="margin-top:14px">
+          <div class="stitle y">Período Fev/26 - R$9.982.350</div>
+          <table>
+            <thead><tr><th>Status</th><th class="r">Valor</th><th class="r">%</th><th class="r">Ativos</th><th class="r">Meta</th><th class="r">Impacto</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--accent)">✓ Comprados</td><td class="r" style="color:var(--accent)">R$4.650.246</td><td class="r">46,6%</td><td class="r">8</td><td class="r" style="color:var(--yellow)">30</td><td class="r" style="color:var(--accent)">+R$232.512</td></tr>
+              <tr><td style="color:var(--red)">Negócios perdidos</td><td class="r" style="color:var(--red)">R$970.152</td><td class="r">9,7%</td><td class="r">3</td><td class="r">-</td><td class="r" style="color:var(--red)">−R$48.508</td></tr>
+              <tr><td style="color:var(--red)">Negócios reprovados</td><td class="r" style="color:var(--red)">R$4.361.952</td><td class="r" style="color:var(--red)">43,7%</td><td class="r">3</td><td class="r" style="color:var(--yellow)">20–25%</td><td class="r" style="color:var(--red)">−R$218.098</td></tr>
+            </tbody>
+          </table>
+          <div class="alert r" style="margin-top:8px">🚨 44% reprovado - quase o dobro do limite. Implantar POP de não conformidade com urgência.</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="stitle g">Simulador de desbloqueio</div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">% pend. processual (meta)</span><span class="sl-val" style="color:var(--accent)" id="rt-vPp">40</span></div>
+          <input type="range" class="b" id="rt-sPp" min="10" max="60" step="1" value="40" oninput="calcReceita()">
+          <div class="sl-hints"><span>10%</span><span style="color:var(--red)">Atual: 53,7%</span><span style="color:var(--accent)">Meta: 40%</span><span>60%</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">% reprovação (meta)</span><span class="sl-val" style="color:var(--yellow)" id="rt-vRep">25</span></div>
+          <input type="range" class="y" id="rt-sRep" min="5" max="50" step="1" value="25" oninput="calcReceita()">
+          <div class="sl-hints"><span>5%</span><span style="color:var(--red)">Atual: 44%</span><span style="color:var(--yellow)">Limite: 25%</span><span>50%</span></div>
+        </div>
+        <div class="sl-block">
+          <div class="sl-hdr"><span class="sl-lbl">Spread médio (%)</span><span class="sl-val" style="color:var(--blue)" id="rt-vSp">5</span></div>
+          <input type="range" class="b" id="rt-sSp" min="3" max="12" step="0.5" value="5" oninput="calcReceita()">
+          <div class="sl-hints"><span>3%</span><span style="color:var(--red)">Atual: 5%</span><span style="color:var(--accent)">Meta: 7%</span><span>12%</span></div>
+        </div>
+        <div class="res-box" style="margin-top:12px">
+          <div class="res-row"><span class="rk">Pend. processual atual</span><span class="rv r">R$7.509.281</span></div>
+          <div class="res-row"><span class="rk">Com meta % liberado</span><span class="rv g" id="rt-rLib">-</span></div>
+          <div class="res-row"><span class="rk">Receita adicional liberada</span><span class="rv g" id="rt-rRec">-</span></div>
+          <div class="res-row"><span class="rk">Economia c/ menos reprovação</span><span class="rv g" id="rt-rEco">-</span></div>
+          <div class="res-row"><span class="rk">Impacto total</span><span class="rv g" id="rt-rTot">-</span></div>
+        </div>
+        <div class="alert g" id="rt-alert" style="margin-top:10px">Calculando...</div>
+        <div class="insight" style="margin-top:10px">
+          <div class="ins-lbl">Ação prioritária</div>
+          <div class="ins-txt">Reduzir pendência processual de 54% → 40% libera ~R$1,9M imediatos sem nenhum novo ativo. Combine com redução de reprovação para efeito máximo.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="view" id="view-global">
+
+    <!-- KPIs topo -->
+    <div class="g4 mb14">
+      <div class="kpi r"><div class="kpi-lbl">Despesa total período</div><div class="kpi-val">R$ 3,78M</div><div class="kpi-sub">Ago/25 → Fev/26</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Receita total período</div><div class="kpi-val">R$ 2,20M</div><div class="kpi-sub">Ago/25 → Fev/26</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Déficit acumulado</div><div class="kpi-val">R$ 907k</div><div class="kpi-sub">caixa no vermelho</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Melhor mês</div><div class="kpi-val">Set/25</div><div class="kpi-sub">rec. R$706k vs desp. R$657k</div></div>
+    </div>
+
+    <!-- Receita x Despesa x Resultado -->
+    <div class="panel mb14">
+      <div class="stitle r">Receita × Despesa × Resultado - mensal</div>
+
+      <!-- Tabela -->
+      <table style="margin-bottom:16px">
+        <thead>
+          <tr>
+            <th>Mês</th>
+            <th class="r">Receita</th>
+            <th class="r">Despesa</th>
+            <th class="r">Resultado</th>
+            <th class="r">Acumulado</th>
+            <th class="r">Spread</th>
+            <th style="min-width:120px">Barra</th>
+          </tr>
+        </thead>
+        <tbody id="mensalBody"></tbody>
+      </table>
+
+      <!-- Gráfico de barras manual -->
+      <div style="font-family:'Figtree',sans-serif;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Visualização - Receita (verde) vs Despesa (vermelho)</div>
+      <div id="globalChart" style="display:flex;align-items:flex-end;gap:8px;height:120px;padding-bottom:4px;border-bottom:1px solid var(--border)"></div>
+      <div style="display:flex;gap:16px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;background:var(--accent);border-radius:2px"></div><span style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2)">Receita</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;background:var(--red);border-radius:2px"></div><span style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2)">Despesa</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;background:var(--blue);border-radius:2px"></div><span style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2)">Resultado</span></div>
+      </div>
+    </div>
+
+    <!-- Déficit acumulado -->
+    <div class="panel mb14">
+      <div class="stitle r">Déficit de caixa acumulado - Ago/25 → Fev/26</div>
+      <div id="deficitChart" style="display:flex;align-items:flex-end;gap:8px;height:90px;margin-bottom:8px"></div>
+      <div class="alert r" id="deficitAlert"></div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px" id="deficitCards"></div>
+    </div>
+
+    <!-- CURVA ABC -->
+    <div class="panel mb14">
+      <div class="stitle b">Curva ABC - despesas por categoria (Ago/25→Fev/26)</div>
+
+      <!-- Legenda classes -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--red-d);border:1px solid rgba(255,48,85,.2);border-radius:7px">
+          <div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:18px;color:var(--red)">A</div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--white)">Classe A - 70% do custo</div><div style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2)">14 categorias · Prioridade máxima de controle</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--yellow-d);border:1px solid rgba(255,204,68,.2);border-radius:7px">
+          <div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:18px;color:var(--yellow)">B</div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--white)">Classe B - 70–90%</div><div style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2)">~16 categorias · Controle intermediário</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--accent-d);border:1px solid rgba(0,212,160,.2);border-radius:7px">
+          <div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:18px;color:var(--accent)">C</div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--white)">Classe C - 90–100%</div><div style="font-family:'Figtree',sans-serif;font-size:10px;color:var(--muted2)">~58 categorias · Baixo impacto individual</div></div>
+        </div>
+      </div>
+
+      <!-- Tabela ABC -->
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Classe</th>
+            <th>Categoria</th>
+            <th class="r">Total período</th>
+            <th class="r">% sobre total</th>
+            <th class="r">% acumulado</th>
+            <th style="min-width:130px">Barra acumulada</th>
+          </tr>
+        </thead>
+        <tbody id="abcBody"></tbody>
+      </table>
+
+      <div class="insight" style="margin-top:12px">
+        <div class="ins-lbl">Leitura estratégica - Curva ABC</div>
+        <div class="ins-txt">
+          Salários + Pro-Labore + Aluguel = <strong style="color:var(--red)">R$2,0M (33,8%)</strong> do total - são os 3 itens que determinam o breakeven.<br>
+          Top 14 categorias classe A consomem <strong style="color:var(--red)">70%</strong> do orçamento com apenas <strong style="color:var(--accent)">15% das linhas</strong>.<br>
+          Foco de reestruturação: qualquer corte nas classes A gera impacto imediato e significativo.
+        </div>
+      </div>
+    </div>
+
+  </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ═══════════════════════
+   NAVIGATION
+═══════════════════════ */
+const TITLES = {
+  home:      ['VISÃO GERAL',    'Consolidado CFO · Fevereiro 2026'],
+  cenarios:  ['CENÁRIOS',       'Simulador de spread, compras e breakeven'],
+  despesas:  ['DESPESAS',       'Estrutura de custos detalhada · Fev/26'],
+  reducao:   ['REDUÇÃO',        'Painel de reestruturação · Meta R$550k'],
+  historico: ['HISTÓRICO',      'Performance Ago/25 → Fev/26 · Pipeline'],
+  'op-leads':     ['OPERAÇÃO - LEADS',       'Estoque · Funil · Cenários de ativação · Fev/26'],
+  'op-conversao': ['OPERAÇÃO - CONVERSÃO',   'Performance por vendedor · Histórico · Cenários · Fev/26'],
+  'op-negociacao':['OPERAÇÃO - NEGOCIAÇÃO',  'Status · Intenções × Descartes · Cenários · Fev/26'],
+  'op-pipeline':  ['OPERAÇÃO - PIPELINE',    'R$43,6M por vendedor · Negociação × Proposta · Cenários · Fev/26'],
+  'op-receita':   ['OPERAÇÃO - RECEITA TRÂNSITO', 'Ativos em trânsito · Período Fev/26 · Cenários'],
+  comercial: ['COMERCIAL',      'Conversão por vendedor · Eficiência operacional'],
+  global:    ['ANÁLISE GLOBAL',  'Curva ABC · Receita × Despesa × Resultado · Déficit acumulado'],
+};
+
+function nav(id, el) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const viewEl = document.getElementById('view-'+id);
+  if(!viewEl) return;
+  viewEl.classList.add('active');
+  if(el) el.classList.add('active');
+  const [t,s] = TITLES[id]||['',''];
+  document.getElementById('topTitle').textContent = t;
+  document.getElementById('topSub').textContent   = s;
+  if(id==='historico') buildHistChart();
+  if(id==='comercial') buildVendedores();
+  if(id==='global') buildGlobal();
+}
+
+/* ═══════════════════════
+   CENÁRIOS
+═══════════════════════ */
+const CEN = {
+  A:{sp:5,   cp:4.6, cv:8.1,  es:667},
+  B:{sp:5,   cp:13,  cv:12,   es:550},
+  C:{sp:6.5, cp:12,  cv:12,   es:550},
+  D:{sp:7,   cp:12,  cv:15,   es:550},
+};
+
+function loadCenario(k,el){
+  document.querySelectorAll('.sc-card').forEach(c=>c.className='sc-card');
+  const cls={A:'sc-card a-r',B:'sc-card a-y',C:'sc-card a-o',D:'sc-card a-g'};
+  el.className=cls[k];
+  const s=CEN[k];
+  document.getElementById('c-sSp').value=s.sp;
+  document.getElementById('c-sCp').value=s.cp;
+  document.getElementById('c-sCv').value=s.cv;
+  document.getElementById('c-sEs').value=s.es;
+  calcCenario();
+}
+
+function calcCenario(){
+  const sp=+document.getElementById('c-sSp').value;
+  const cp=+document.getElementById('c-sCp').value*1e6;
+  const cv=+document.getElementById('c-sCv').value;
+  const es=+document.getElementById('c-sEs').value*1000;
+  const rec=cp*(sp/100);
+  const res=rec-es;
+  const mgm=rec>0?(res/rec*100):-999;
+  const be=es/(sp/100);
+  const intAtu=Math.round(1709*0.0813);
+  const intNov=Math.round(1709*(cv/100));
+  const diff=intNov-intAtu;
+
+  document.getElementById('c-vSp').textContent=sp.toFixed(1)+'%';
+  document.getElementById('c-vCp').textContent='R$ '+cp.toFixed(0)==='R$ 0'?'R$ 1M':'R$ '+(cp/1e6).toFixed(1)+'M';
+  document.getElementById('c-vCp').textContent='R$ '+(+document.getElementById('c-sCp').value).toFixed(1)+'M';
+  document.getElementById('c-vCv').textContent=cv.toFixed(1)+'%';
+  document.getElementById('c-vEs').textContent='R$ '+Math.round(es/1000)+'k';
+  document.getElementById('c-rRec').textContent=fmtR(rec);
+  document.getElementById('c-rEst').textContent=fmtR(es);
+  const rEl=document.getElementById('c-rRes');
+  rEl.textContent=fmtR(res);rEl.className='rv '+(res>=0?'g':'r');
+  const mEl=document.getElementById('c-rMgm');
+  mEl.textContent=mgm>-100?mgm.toFixed(1)+'%':'< -100%';
+  mEl.className='rv '+(mgm>=15?'g':mgm>=8?'y':mgm>=0?'o':'r');
+  document.getElementById('c-rBE').textContent='R$ '+(be/1e6).toFixed(1)+'M/mês';
+  const cvEl=document.getElementById('c-rCv');
+  cvEl.textContent=(diff>=0?'+':'')+diff+' intenções → '+fmtR(diff*200000);
+  cvEl.className='rv '+(diff>=0?'g':'r');
+  document.getElementById('c-beVal').textContent='R$ '+(be/1e6).toFixed(1)+'M/mês';
+  document.getElementById('c-beSub').textContent='R$ '+Math.round(es/1000)+'k ÷ '+sp.toFixed(1)+'% = volume mínimo';
+  const pct=Math.max(0,Math.min(100,(mgm/30)*100));
+  const fill=document.getElementById('c-mFill');
+  fill.style.width=pct+'%';
+  fill.style.background=mgm>=15?'var(--accent)':mgm>=8?'var(--yellow)':mgm>=0?'var(--orange)':'var(--red)';
+  document.getElementById('c-mPct').textContent=(res>=0?'+':'')+( mgm>-100?mgm.toFixed(1):'<-100')+'%';
+  const al=document.getElementById('c-alert');
+  if(res>=100000){al.className='alert g';al.textContent='✓ Operação saudável. Margem positiva com folga.';}
+  else if(res>0){al.className='alert y';al.textContent='→ No limite. Qualquer oscilação gera déficit.';}
+  else{al.className='alert r';al.textContent='⚠ Déficit de '+fmtR(Math.abs(res))+'. Estrutura não coberta.';}
+}
+
+/* ═══════════════════════
+   REDUÇÃO
+═══════════════════════ */
+const RED_ATUAL=667971, RED_META=550000;
+const RED_BASE={alug:70000,mo:211149,plat:56235,juros:13600,dv:35217};
+
+function calcReducao(){
+  const cAlug=+document.getElementById('r-sAlug').value;
+  const cMO  =+document.getElementById('r-sMO').value;
+  const cPlat=+document.getElementById('r-sPlat').value;
+  const cJuros=+document.getElementById('r-sJuros').value;
+  const cDV  =+document.getElementById('r-sDV').value;
+
+  document.getElementById('r-lblAlug').textContent =fmtR(cAlug);
+  document.getElementById('r-lblMO').textContent   =fmtR(cMO);
+  document.getElementById('r-lblPlat').textContent =fmtR(cPlat);
+  document.getElementById('r-lblJuros').textContent=fmtR(cJuros);
+  document.getElementById('r-lblDV').textContent   =fmtR(cDV);
+
+  const nAlug=RED_BASE.alug-cAlug, nMO=RED_BASE.mo-cMO;
+  const nPlat=RED_BASE.plat-cPlat, nJuros=RED_BASE.juros-cJuros;
+  const nDV=RED_BASE.dv-cDV;
+
+  document.getElementById('r-vAlug').textContent='R$'+Math.round(nAlug/1000)+'k';
+  document.getElementById('r-vMO').textContent  ='R$'+Math.round(nMO/1000)+'k';
+  document.getElementById('r-vPlat').textContent='R$'+Math.round(nPlat/1000)+'k';
+  document.getElementById('r-vJuros').textContent='R$'+Math.round(nJuros/1000)+'k';
+  document.getElementById('r-vDV').textContent  ='R$'+Math.round(nDV/1000)+'k';
+
+  document.getElementById('r-eAlug').textContent =cAlug>0?'−'+fmtR(cAlug):'R$0';
+  document.getElementById('r-eMO').textContent   =cMO>0?'−'+fmtR(cMO):'R$0';
+  document.getElementById('r-ePlat').textContent =cPlat>0?'−'+fmtR(cPlat):'R$0';
+  document.getElementById('r-eJuros').textContent=cJuros>0?'−'+fmtR(cJuros):'R$0';
+  document.getElementById('r-eDV').textContent   =cDV>0?'−'+fmtR(cDV):'R$0';
+
+  const totalCorte=cAlug+cMO+cPlat+cJuros+cDV;
+  const totalNovo=RED_ATUAL-totalCorte;
+  const diff=totalNovo-RED_META;
+
+  document.getElementById('r-totalNovo').textContent='R$'+Math.round(totalNovo/1000)+'k';
+  document.getElementById('r-totalNovo').style.color=totalNovo<=RED_META?'var(--accent)':totalNovo<RED_ATUAL?'var(--yellow)':'var(--red)';
+  document.getElementById('r-totalEcon').textContent='−'+fmtR(totalCorte);
+  document.getElementById('r-resTotal').textContent=fmtR(totalNovo);
+  document.getElementById('r-resTotal').className='rv '+(totalNovo<=RED_META?'g':'r');
+
+  const dEl=document.getElementById('r-resDiff');
+  if(diff<=0){dEl.textContent='✓ Abaixo da meta '+fmtR(Math.abs(diff));dEl.className='rv g';}
+  else{dEl.textContent='⚠ Faltam '+fmtR(diff);dEl.className='rv r';}
+
+  document.getElementById('r-resCorte').textContent=fmtR(totalCorte);
+  document.getElementById('r-resAnual').textContent='R$ '+(totalCorte*12/1e6).toFixed(1)+'M';
+
+  const be5=totalNovo/0.05,be65=totalNovo/0.065,be7=totalNovo/0.07;
+  document.getElementById('r-resBE').textContent='R$ '+(be5/1e6).toFixed(1)+'M';
+  document.getElementById('r-be5').textContent='R$'+(be5/1e6).toFixed(1)+'M';
+  document.getElementById('r-be65').textContent='R$'+(be65/1e6).toFixed(1)+'M';
+  document.getElementById('r-be7').textContent='R$'+(be7/1e6).toFixed(1)+'M';
+
+  const ating=Math.min(100,(totalCorte/117971)*100);
+  document.getElementById('r-gaugeFill').style.width=ating+'%';
+  document.getElementById('r-gaugeFill').style.background=ating>=100?'var(--accent)':ating>=60?'var(--yellow)':'var(--red)';
+  document.getElementById('r-gaugePct').textContent=ating.toFixed(0)+'%';
+
+  const al=document.getElementById('r-alert');
+  if(totalNovo<=RED_META){al.className='alert g';al.textContent='✓ Meta atingida! Estrutura em '+fmtR(totalNovo)+' - dentro de R$550k.';}
+  else if(diff<=30000){al.className='alert y';al.textContent='→ Quase lá. Faltam '+fmtR(diff)+' de corte.';}
+  else{al.className='alert r';al.textContent='⚠ Faltam '+fmtR(diff)+' de corte para atingir R$550k.';}
+}
+
+/* ═══════════════════════
+   HISTÓRICO CHART
+═══════════════════════ */
+const HIST=[
+  {mes:'Ago',sp:5.72},{mes:'Set',sp:7.05},{mes:'Out',sp:7.71},
+  {mes:'Nov',sp:9.41},{mes:'Dez',sp:9.77},{mes:'Jan',sp:7.41},{mes:'Fev',sp:5.69}
+];
+
+function buildHistChart(){
+  const max=Math.max(...HIST.map(h=>h.sp));
+  const c=document.getElementById('histChart');
+  if(!c)return;
+  c.innerHTML=HIST.map(h=>{
+    const hp=(h.sp/max)*72;
+    const col=h.sp>=8?'var(--accent)':h.sp>=6.5?'var(--yellow)':'var(--orange)';
+    const isFev=h.mes==='Fev';
+    return`<div class="hist-col">
+      <div style="font-family:'Figtree',sans-serif;font-size:8px;color:${isFev?'var(--red)':col};margin-bottom:2px;${isFev?'font-weight:700':''}">${h.sp}%</div>
+      <div class="hist-bar" style="height:${hp}px;background:${isFev?'var(--red)':col};width:100%;border-radius:3px 3px 0 0;${isFev?'box-shadow:0 0 8px var(--red)':''}"></div>
+      <div class="hist-lbl" style="${isFev?'color:var(--red);font-weight:700':''}">${h.mes}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════
+   VENDEDORES
+═══════════════════════ */
+const VENDS=[
+  {n:'Julia Silva',       c:16.05,s:'alta'},
+  {n:'Caue Oliveira',     c:13.94,s:'alta'},
+  {n:'Frank Zacarias',    c:11.31,s:'alta'},
+  {n:'Natália Travaglia', c:8.89, s:'media'},
+  {n:'Luiz Neto',         c:8.02, s:'media'},
+  {n:'Mariana Balbino',   c:7.69, s:'media'},
+  {n:'Vanilda Santos',    c:5.61, s:'baixa'},
+  {n:'Sandra Oliveira',   c:5.05, s:'baixa'},
+  {n:'Isadora Santos',    c:4.72, s:'baixa'},
+  {n:'Gabriel Henrique',  c:1.58, s:'critico'},
+];
+
+function buildVendedores(){
+  const tb=document.getElementById('vendBody');
+  if(!tb)return;
+  tb.innerHTML=VENDS.map(v=>{
+    const pct=Math.min(100,(v.c/20)*100);
+    const col=v.c>=12?'var(--accent)':v.c>=8?'var(--yellow)':v.c>=5?'var(--orange)':'var(--red)';
+    return`<tr>
+      <td style="color:var(--text)">${v.n}</td>
+      <td class="r" style="color:${col};font-weight:700">${v.c.toFixed(2)}%</td>
+      <td><div class="conv-row"><div class="conv-track"><div class="conv-fill" style="width:${pct}%;background:${col}"></div></div></div></td>
+      <td><span class="badge ${v.s}">${v.s}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ═══════════════════════
+   HELPERS
+═══════════════════════ */
+function fmtR(v){
+  return 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+}
+
+
+/* ═══════════ LEADS ═══════════ */
+function calcLeads(){
+  const lpd = +document.getElementById('l-sLpd').value;
+  const du  = +document.getElementById('l-sDu').value;
+  const nv  = +document.getElementById('l-sNv').value;
+  const ldt = Math.round(lpd * nv);
+  const lmt = ldt * du;
+  const est = 1439;
+  const pct = Math.min(100,(lmt/est*100));
+  const giro = lmt >= est*0.9 ? '80–90%' : lmt >= est*0.5 ? '50–60%' : Math.round(lmt/est*100)+'%';
+  document.getElementById('l-vLpd').textContent = lpd.toFixed(1);
+  document.getElementById('l-vDu').textContent  = du;
+  document.getElementById('l-vNv').textContent  = nv;
+  document.getElementById('l-rLdt').textContent = ldt;
+  document.getElementById('l-rLmt').textContent = lmt.toLocaleString('pt-BR');
+  document.getElementById('l-rPct').textContent = pct.toFixed(1)+'%';
+  document.getElementById('l-rPct').className   = 'rv '+(pct>=30?'g':pct>=15?'y':'r');
+  document.getElementById('l-rGiro').textContent = giro;
+  const al = document.getElementById('l-alert');
+  if(pct>=30){al.className='alert g';al.textContent='✓ Estoque bem ativado. Giro saudável com essa cadência.';}
+  else if(pct>=15){al.className='alert y';al.textContent='→ Ativação parcial. Aumentar leads/dia para atingir 30%.';}
+  else{al.className='alert r';al.textContent='⚠ Ativação crítica abaixo de 15%. Ajuste urgente de cadência.';}
+}
+
+/* ═══════════ CONVERSÃO ═══════════ */
+function calcConversao(){
+  const meta  = +document.getElementById('cv-sMeta').value;
+  const base  = +document.getElementById('cv-sBase').value;
+  const tick  = +document.getElementById('cv-sTick').value*1000;
+  const int   = Math.round(base*(meta/100));
+  const atInt = Math.round(base*0.0813);
+  const diff  = int - atInt;
+  const vol   = int * tick;
+  const rec5  = vol * 0.05;
+  const rec7  = vol * 0.07;
+  document.getElementById('cv-vMeta').textContent  = meta.toFixed(1)+'%';
+  document.getElementById('cv-vBase').textContent  = base.toLocaleString('pt-BR');
+  document.getElementById('cv-vTick').textContent  = 'R$'+tick/1000+'k';
+  document.getElementById('cv-rInt').textContent   = int;
+  const dEl = document.getElementById('cv-rDiff');
+  dEl.textContent = (diff>=0?'+':'')+diff+' vs hoje ('+atInt+')';
+  dEl.className   = 'rv '+(diff>=0?'g':'r');
+  document.getElementById('cv-rVol').textContent   = 'R$'+(vol/1e6).toFixed(1)+'M';
+  document.getElementById('cv-rRec').textContent   = 'R$'+(rec5/1000).toFixed(0)+'k';
+  document.getElementById('cv-rRec7').textContent  = 'R$'+(rec7/1000).toFixed(0)+'k';
+  const al = document.getElementById('cv-alert');
+  if(meta>=15){al.className='alert g';al.textContent='✓ Alta performance. Potencial de R$'+(vol/1e6).toFixed(1)+'M em compras.';}
+  else if(meta>=12){al.className='alert y';al.textContent='→ Meta mínima atingida. Buscar 15%+ para alta performance.';}
+  else{al.className='alert r';al.textContent='⚠ Abaixo do mínimo. Conversão precisa superar 12% urgentemente.';}
+}
+
+/* ═══════════ NEGOCIAÇÃO ═══════════ */
+function calcNeg(){
+  const atv  = +document.getElementById('ng-sAtv').value;
+  const txi  = +document.getElementById('ng-sTxi').value;
+  const tick = +document.getElementById('ng-sTick').value*1000;
+  const tot  = atv * 10;
+  const int  = Math.round(tot*(txi/100));
+  const vol  = int * tick;
+  const rec  = vol * 0.05;
+  const desc = Math.round(tot * 0.4);
+  document.getElementById('ng-vAtv').textContent  = atv;
+  document.getElementById('ng-vTxi').textContent  = txi+'%';
+  document.getElementById('ng-vTick').textContent = 'R$'+tick/1000+'k';
+  document.getElementById('ng-rTot').textContent  = tot;
+  document.getElementById('ng-rInt').textContent  = int;
+  document.getElementById('ng-rVol').textContent  = 'R$'+(vol/1e6).toFixed(1)+'M';
+  document.getElementById('ng-rRec').textContent  = 'R$'+(rec/1000).toFixed(0)+'k';
+  document.getElementById('ng-rDesc').textContent = desc;
+  const al = document.getElementById('ng-alert');
+  if(int>=8){al.className='alert g';al.textContent='✓ '+int+' intenções/mês - meta ideal atingida!';}
+  else if(int>=6){al.className='alert y';al.textContent='→ '+int+' intenções - mínimo atingido. Buscar 8+.';}
+  else{al.className='alert r';al.textContent='⚠ Apenas '+int+' intenções. Mínimo é 6/mês por vendedor.';}
+}
+
+/* ═══════════ PIPELINE ═══════════ */
+function calcPipeline(){
+  const pct = +document.getElementById('pp-sPct').value;
+  const sp  = +document.getElementById('pp-sSp').value;
+  const pip = +document.getElementById('pp-sPip').value*1e6;
+  const comp = pip*(pct/100);
+  const rec  = comp*(sp/100);
+  const res  = rec - 550000;
+  document.getElementById('pp-vPct').textContent = pct+'%';
+  document.getElementById('pp-vSp').textContent  = sp+'%';
+  document.getElementById('pp-vPip').textContent = 'R$'+(pip/1e6).toFixed(1)+'M';
+  document.getElementById('pp-rComp').textContent= 'R$'+(comp/1e6).toFixed(1)+'M';
+  document.getElementById('pp-rRec').textContent = 'R$'+(rec/1000).toFixed(0)+'k';
+  const mEl = document.getElementById('pp-rMeta');
+  const diff = comp - 12e6;
+  mEl.textContent = (diff>=0?'+':'')+' R$'+(Math.abs(diff)/1e6).toFixed(1)+'M vs R$12M';
+  mEl.className   = 'rv '+(diff>=0?'g':'r');
+  const rEl = document.getElementById('pp-rRes');
+  rEl.textContent = (res>=0?'+':'')+'R$'+(Math.abs(res)/1000).toFixed(0)+'k';
+  rEl.className   = 'rv '+(res>=0?'g':'r');
+  const al = document.getElementById('pp-alert');
+  if(comp>=12e6){al.className='alert g';al.textContent='✓ Meta de R$12M atingida! Resultado: R$'+(res/1000).toFixed(0)+'k.';}
+  else{al.className='alert r';al.textContent='⚠ Compras R$'+(comp/1e6).toFixed(1)+'M - faltam R$'+((12e6-comp)/1e6).toFixed(1)+'M para meta.';}
+}
+
+/* ═══════════ RECEITA TRÂNSITO ═══════════ */
+function calcReceita(){
+  const pp  = +document.getElementById('rt-sPp').value;
+  const rep = +document.getElementById('rt-sRep').value;
+  const sp  = +document.getElementById('rt-sSp').value;
+  const transit = 13974671;
+  const periodo = 9982350;
+  const ppAtual = transit * 0.537;
+  const ppMeta  = transit * (pp/100);
+  const libPP   = Math.max(0, ppAtual - ppMeta);
+  const recLib  = libPP * (sp/100);
+  const repAtual= periodo * 0.437;
+  const repMeta = periodo * (rep/100);
+  const eco     = Math.max(0,(repAtual - repMeta)) * (sp/100);
+  const tot     = recLib + eco;
+  document.getElementById('rt-vPp').textContent  = pp+'%';
+  document.getElementById('rt-vRep').textContent = rep+'%';
+  document.getElementById('rt-vSp').textContent  = sp+'%';
+  document.getElementById('rt-rLib').textContent = 'R$'+(libPP/1e6).toFixed(2)+'M';
+  document.getElementById('rt-rRec').textContent = '+R$'+(recLib/1000).toFixed(0)+'k';
+  document.getElementById('rt-rEco').textContent = '+R$'+(eco/1000).toFixed(0)+'k';
+  document.getElementById('rt-rTot').textContent = '+R$'+(tot/1000).toFixed(0)+'k/mês';
+  const al = document.getElementById('rt-alert');
+  if(tot>=200000){al.className='alert g';al.textContent='✓ Excelente! '+('R$'+(tot/1000).toFixed(0)+'k')+' de receita adicional liberada ao mês.';}
+  else if(tot>=100000){al.className='alert y';al.textContent='→ Bom progresso. R$'+(tot/1000).toFixed(0)+'k liberados. Continue reduzindo gargalos.';}
+  else{al.className='alert r';al.textContent='⚠ Impacto ainda pequeno. Reduza mais a pendência processual e reprovações.';}
+}
+
+
+/* ═══════════════════════
+   ANÁLISE GLOBAL
+═══════════════════════ */
+const MENSAL = [
+  {mes:'Ago/25', rec:0,      desp:555742, res:-555742, acum:-555742,  spread:0,    meta:0},
+  {mes:'Set/25', rec:705899, desp:657011, res:48888,   acum:-506854,  spread:6.37, meta:6500000},
+  {mes:'Out/25', rec:303674, desp:779297, res:-475623, acum:-982477,  spread:4.67, meta:10150000},
+  {mes:'Nov/25', rec:391726, desp:487547, res:-95821,  acum:-1078298, spread:8.09, meta:11050000},
+  {mes:'Dez/25', rec:426275, desp:340016, res:86259,   acum:-992039,  spread:8.68, meta:11750000},
+  {mes:'Jan/26', rec:144117, desp:185872, res:-41755,  acum:-1033794, spread:7.0,  meta:12400000},
+  {mes:'Fev/26', rec:228407, desp:101478, res:126929,  acum:-906865,  spread:5.69, meta:0},
+];
+
+const ABC_DATA = [
+  {cat:'Salários',                    val:868974, pct:14.7, acum:14.7, classe:'A'},
+  {cat:'Pro-Labore',                  val:630721, pct:10.7, acum:25.3, classe:'A'},
+  {cat:'Aluguel',                     val:500302, pct:8.5,  acum:33.8, classe:'A'},
+  {cat:'Plataforma',                  val:340985, pct:5.8,  acum:39.5, classe:'A'},
+  {cat:'Despesas Diretoria',          val:279186, pct:4.7,  acum:44.3, classe:'A'},
+  {cat:'Consultoria Especialista PJ', val:277516, pct:4.7,  acum:48.9, classe:'A'},
+  {cat:'Vale Refeição',               val:211695, pct:3.6,  acum:52.5, classe:'A'},
+  {cat:'Prestador de Serviço',        val:198635, pct:3.4,  acum:55.9, classe:'A'},
+  {cat:'Assistência Médica',          val:154219, pct:2.6,  acum:58.5, classe:'A'},
+  {cat:'Adiant. a Fornecedores',      val:149618, pct:2.5,  acum:61.0, classe:'A'},
+  {cat:'Equipamentos Informática',    val:132382, pct:2.2,  acum:63.2, classe:'A'},
+  {cat:'Marketing Estratégico',       val:117030, pct:2.0,  acum:65.2, classe:'A'},
+  {cat:'Empréstimo entre empresas',   val:98298,  pct:1.7,  acum:66.9, classe:'A'},
+  {cat:'Adiantamento',                val:97418,  pct:1.6,  acum:68.5, classe:'A'},
+  {cat:'Comissão de Parceiros',       val:92677,  pct:1.6,  acum:70.1, classe:'B'},
+  {cat:'FGTS',                        val:90858,  pct:1.5,  acum:71.6, classe:'B'},
+  {cat:'Contabilidade',               val:86102,  pct:1.5,  acum:73.1, classe:'B'},
+  {cat:'Endomarketing',               val:82926,  pct:1.4,  acum:74.5, classe:'B'},
+  {cat:'Rescisões',                   val:82550,  pct:1.4,  acum:75.9, classe:'B'},
+  {cat:'Custas Escritura/Procuração', val:75764,  pct:1.3,  acum:77.2, classe:'B'},
+  {cat:'Licenças Software',           val:74558,  pct:1.3,  acum:78.4, classe:'B'},
+  {cat:'ISS',                         val:63890,  pct:1.1,  acum:79.5, classe:'B'},
+  {cat:'INSS',                        val:61538,  pct:1.0,  acum:80.5, classe:'B'},
+  {cat:'Férias',                      val:61360,  pct:1.0,  acum:81.6, classe:'B'},
+  {cat:'Outros Benefícios',           val:58539,  pct:1.0,  acum:82.6, classe:'B'},
+  {cat:'Juros s/ Empréstimos',        val:56862,  pct:1.0,  acum:83.5, classe:'B'},
+  {cat:'Custo com Cartório',          val:56366,  pct:1.0,  acum:84.5, classe:'B'},
+  {cat:'13º Salário',                 val:54707,  pct:0.9,  acum:85.4, classe:'B'},
+  {cat:'Plano de Saúde',              val:53547,  pct:0.9,  acum:86.3, classe:'B'},
+  {cat:'Demais categorias',           val:410000, pct:6.9,  acum:100,  classe:'C'},
+];
+
+function buildGlobal() {
+  const tb = document.getElementById('mensalBody');
+  if (!tb) return;
+
+  const maxVal = Math.max(...MENSAL.map(m => Math.max(m.rec, m.desp)));
+
+  // ─ Tabela mensal ─
+  tb.innerHTML = MENSAL.map(m => {
+    const pos = m.res >= 0;
+    const rPct = (m.rec/maxVal*100).toFixed(0);
+    const dPct = (m.desp/maxVal*100).toFixed(0);
+    return `<tr>
+      <td style="font-weight:700;color:var(--white)">${m.mes}</td>
+      <td class="r" style="color:var(--accent)">${m.rec>0?fmtR(m.rec):'-'}</td>
+      <td class="r" style="color:var(--red)">${fmtR(m.desp)}</td>
+      <td class="r" style="color:${pos?'var(--accent)':'var(--red)'};font-weight:700">${pos?'+':''}${fmtR(m.res)}</td>
+      <td class="r" style="color:${m.acum>=0?'var(--accent)':'var(--red)'};font-weight:700">${fmtR(m.acum)}</td>
+      <td class="r" style="color:${m.spread>=6.25?'var(--accent)':m.spread>0?'var(--yellow)':'var(--muted2)'}">${m.spread>0?m.spread.toFixed(2)+'%':'-'}</td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:${rPct}%;background:var(--accent)"></div></div>
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:${dPct}%;background:var(--red)"></div></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('') + `<tr style="background:var(--blue-d)">
+    <td style="font-weight:700;color:var(--white)">TOTAL</td>
+    <td class="r" style="color:var(--accent);font-weight:700">R$ 2,20M</td>
+    <td class="r" style="color:var(--red);font-weight:700">R$ 3,11M</td>
+    <td class="r" style="color:var(--red);font-weight:700">−R$ 907k</td>
+    <td class="r" style="color:var(--red);font-weight:700">−R$ 907k</td>
+    <td class="r" style="color:var(--yellow)">6,5% méd.</td>
+    <td></td>
+  </tr>`;
+
+  // ─ Gráfico barras receita x despesa ─
+  const chart = document.getElementById('globalChart');
+  if(chart) chart.innerHTML = MENSAL.map(m => {
+    const rH = Math.max(3, (m.rec/maxVal*110)).toFixed(0);
+    const dH = Math.max(3, (m.desp/maxVal*110)).toFixed(0);
+    const pos = m.res >= 0;
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+      <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:110px">
+        <div style="flex:1;background:var(--accent);opacity:.75;border-radius:3px 3px 0 0;height:${rH}px"></div>
+        <div style="flex:1;background:var(--red);opacity:.75;border-radius:3px 3px 0 0;height:${dH}px"></div>
+      </div>
+      <div style="font-family:'Figtree',sans-serif;font-size:9px;color:${pos?'var(--accent)':'var(--red)'};font-weight:700">${pos?'+':''}${(m.res/1000).toFixed(0)}k</div>
+      <div style="font-family:'Figtree',sans-serif;font-size:8px;color:var(--muted)">${m.mes}</div>
+    </div>`;
+  }).join('');
+
+  // ─ Déficit acumulado ─
+  const defChart = document.getElementById('deficitChart');
+  const maxAbs = Math.max(...MENSAL.map(m => Math.abs(m.acum)));
+  if(defChart) defChart.innerHTML = MENSAL.map(m => {
+    const h = Math.max(4, (Math.abs(m.acum)/maxAbs*80)).toFixed(0);
+    const col = m.acum >= 0 ? 'var(--accent)' : 'var(--red)';
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+      <div style="font-family:'Figtree',sans-serif;font-size:9px;color:${col};font-weight:700">${(m.acum/1000).toFixed(0)}k</div>
+      <div style="width:100%;background:${col};opacity:.7;border-radius:3px 3px 0 0;height:${h}px"></div>
+      <div style="font-family:'Figtree',sans-serif;font-size:8px;color:var(--muted)">${m.mes}</div>
+    </div>`;
+  }).join('');
+
+  // ─ Alert déficit ─
+  const al = document.getElementById('deficitAlert');
+  if(al) al.textContent = '⚠ Déficit acumulado de R$907k no período. Pior momento: Nov/25 com R$1,08M no vermelho. Fev/26 mostra recuperação (+R$127k no mês), mas estrutura ainda consome mais do que gera.';
+
+  // ─ Cards déficit ─
+  const dc = document.getElementById('deficitCards');
+  if(dc) dc.innerHTML = MENSAL.map(m => {
+    const pos = m.res >= 0;
+    return `<div style="background:var(--bg2);border:1px solid ${pos?'rgba(0,212,160,.2)':'rgba(255,48,85,.2)'};border-radius:7px;padding:10px;text-align:center">
+      <div style="font-family:'Figtree',sans-serif;font-size:9px;color:var(--muted2);margin-bottom:3px">${m.mes}</div>
+      <div style="font-family:'Figtree',sans-serif;font-weight:900;font-size:15px;color:${pos?'var(--accent)':'var(--red)'}">${pos?'+':''}${(m.res/1000).toFixed(0)}k</div>
+      <div style="font-family:'Figtree',sans-serif;font-size:9px;color:var(--muted2);margin-top:2px">desp: ${(m.desp/1000).toFixed(0)}k</div>
+      <div style="font-family:'Figtree',sans-serif;font-size:9px;color:${m.acum>=0?'var(--accent)':'var(--red)'};margin-top:1px">acum: ${(m.acum/1000).toFixed(0)}k</div>
+    </div>`;
+  }).join('');
+
+  // ─ ABC Table ─
+  const abc = document.getElementById('abcBody');
+  if(!abc) return;
+  let prevClasse = '';
+  abc.innerHTML = ABC_DATA.map((d,i) => {
+    const col = d.classe==='A'?'var(--red)':d.classe==='B'?'var(--yellow)':'var(--accent)';
+    const bord = d.classe !== prevClasse ? 'border-top:2px solid var(--border2)' : '';
+    prevClasse = d.classe;
+    return `<tr style="${bord}">
+      <td style="color:var(--muted2);font-size:11px">${i+1}</td>
+      <td><span style="font-family:'Figtree',sans-serif;font-weight:900;font-size:16px;color:${col}">${d.classe}</span></td>
+      <td style="color:var(--text);font-size:11px">${d.cat}</td>
+      <td class="r" style="color:${col};font-weight:700">${fmtR(d.val)}</td>
+      <td class="r" style="color:var(--muted2)">${d.pct.toFixed(1)}%</td>
+      <td class="r" style="color:${col};font-weight:600">${d.acum.toFixed(1)}%</td>
+      <td>
+        <div style="position:relative;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${Math.min(100,d.acum).toFixed(0)}%;background:${col};border-radius:3px;opacity:.7"></div>
+          <div style="position:absolute;left:70%;top:-2px;bottom:-2px;width:1px;background:var(--red);opacity:.4"></div>
+          <div style="position:absolute;left:90%;top:-2px;bottom:-2px;width:1px;background:var(--yellow);opacity:.4"></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ═══════════════════════
+   INIT
+═══════════════════════ */
+calcCenario();
+calcReducao();
+buildHistChart();
+buildVendedores();
+buildGlobal();
+calcLeads();
+calcConversao();
+calcNeg();
+calcPipeline();
+calcReceita();
+
+/* ═══════════════════════
+   ANÁLISE GLOBAL DATA
+═══════════════════════ */
+
+
+
+</script>
+
+</body>
+</html>
