@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análise ROCE — Ativos Judiciais · V7</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=Playfair+Display:wght@700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1a3b;--card:#0f2247;--surf:#112550;--t1:#e8e6e3;--t2:#8a8a9a;--t3:#55556a;--red:#ff3b5c;--amb:#ffb020;--grn:#00d68f;--blu:#4e7cff;--brd:rgba(255,255,255,.08);--r:16px;--rs:10px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-40%;left:-20%;width:80vw;height:80vw;background:radial-gradient(circle,rgba(78,124,255,.06) 0%,transparent 60%);pointer-events:none}
+.ct{max-width:1100px;margin:0 auto;padding:32px 24px 80px;position:relative;z-index:1}
+.hd{text-align:center;margin-bottom:22px;animation:fu .8s ease}
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--red);background:rgba(255,59,92,.1);border:1px solid rgba(255,59,92,.2);padding:5px 14px;border-radius:100px;margin-bottom:16px}
+.hd h1{font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,42px);font-weight:900;line-height:1.1;margin-bottom:8px;background:linear-gradient(135deg,#fff 30%,var(--blu) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hd p{font-size:13px;color:var(--t2);max-width:560px;margin:0 auto;line-height:1.5}
+.tabs{display:flex;gap:3px;margin-bottom:22px;background:var(--card);border-radius:12px;padding:4px;border:1px solid var(--brd)}
+.tb{flex:1;padding:11px 8px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;color:var(--t3);background:0;border:0;border-radius:8px;cursor:pointer;transition:.3s}
+.tb:hover{color:var(--t2);background:rgba(255,255,255,.03)}.tb.on{color:var(--t1);background:var(--surf);box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.tc{display:none;animation:fu .5s ease}.tc.on{display:block}
+.mr{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.mc{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:16px 8px;text-align:center;position:relative;overflow:hidden;transition:.3s}
+.mc:hover{transform:translateY(-2px)}.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.mc.r::before{background:var(--red)}.mc.a::before{background:var(--amb)}.mc.g::before{background:var(--grn)}.mc.b::before{background:var(--blu)}
+.ml{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.mv{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;line-height:1}
+.mv.r{color:var(--red)}.mv.a{color:var(--amb)}.mv.g{color:var(--grn)}.mv.b{color:var(--blu)}
+.ms{font-size:8px;color:var(--t3);margin-top:3px}
+.sec{margin-bottom:22px}.sh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sn{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--t3);opacity:.4}
+.st{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t1)}.sl{flex:1;height:1px;background:var(--brd)}
+.cd{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:20px;transition:.3s}.cd:hover{border-color:rgba(255,255,255,.12)}
+.cd p{font-size:12px;line-height:1.6;color:var(--t2);margin-bottom:8px}.cd p:last-child{margin-bottom:0}
+.fb{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rs);padding:12px;text-align:center;margin:8px 0}
+.fm{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--blu)}
+table.dt{width:100%;border-collapse:separate;border-spacing:0;margin:8px 0;font-size:11px;border-radius:var(--rs);overflow:hidden;border:1px solid var(--brd)}
+.dt thead th{background:var(--surf);font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);padding:8px;text-align:left;border-bottom:1px solid var(--brd)}
+.dt thead th:not(:first-child){text-align:right}
+.dt tbody td{padding:7px 8px;border-bottom:1px solid var(--brd);color:var(--t2)}
+.dt tbody td:not(:first-child){text-align:right;font-family:'JetBrains Mono',monospace;font-weight:500}
+.dt tbody tr:last-child td{border-bottom:0}.dt tbody tr:hover{background:rgba(255,255,255,.02)}
+.dt .tr td{background:rgba(78,124,255,.08);font-weight:700;color:var(--t1);border-top:2px solid rgba(78,124,255,.3)}
+.ng{color:var(--red)!important}.ps{color:var(--grn)!important}
+table.sc{width:100%;border-collapse:separate;border-spacing:0;margin:8px 0;border-radius:var(--rs);overflow:hidden;border:1px solid var(--brd);font-size:11px}
+.sc thead th{background:var(--surf);font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);padding:8px;text-align:center;border-bottom:1px solid var(--brd)}
+.sc thead th:first-child{text-align:left}.sc thead th.cr{color:var(--red)}.sc thead th.ca{color:var(--amb)}.sc thead th.cg{color:var(--grn)}
+.sc tbody td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--brd);color:var(--t2)}
+.sc tbody td:first-child{text-align:left;font-weight:500;color:var(--t1)}.sc tbody tr:last-child td{border-bottom:0}
+.sc .hr td{background:rgba(255,255,255,.02);font-weight:700;font-family:'JetBrains Mono',monospace}
+.vr{color:var(--red)!important}.va{color:var(--amb)!important}.vg{color:var(--grn)!important}
+.math{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rs);padding:12px;margin:8px 0}
+.math h4{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amb);margin-bottom:6px}
+.math-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--brd);font-size:11px}
+.math-row:last-child{border-bottom:0;padding-top:5px;margin-top:2px;border-top:2px solid var(--brd)}
+.math-row span:first-child{color:var(--t2)}.math-row span:last-child{font-family:'JetBrains Mono',monospace;font-weight:700}
+.ab{background:linear-gradient(135deg,rgba(255,59,92,.12),rgba(255,59,92,.04));border:1px solid rgba(255,59,92,.2);border-radius:14px;padding:18px;text-align:center;margin:10px 0}
+.ab h3{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--red);margin-bottom:5px}
+.ab p{font-size:11px;color:var(--t2);line-height:1.55;max-width:520px;margin:0 auto}.ab strong{color:var(--t1)}
+.ab.grn{background:linear-gradient(135deg,rgba(0,214,143,.12),rgba(0,214,143,.04));border-color:rgba(0,214,143,.2)}.ab.grn h3{color:var(--grn)}
+.ab.blu{background:linear-gradient(135deg,rgba(78,124,255,.12),rgba(78,124,255,.04));border-color:rgba(78,124,255,.2)}.ab.blu h3{color:var(--blu)}
+.note{background:rgba(78,124,255,.08);border:1px solid rgba(78,124,255,.2);border-radius:var(--rs);padding:10px 12px;margin:8px 0;font-size:10px;color:var(--t2);line-height:1.5}.note strong{color:var(--blu)}
+.tc2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.dc{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rs);padding:12px;position:relative;transition:.3s}
+.dc:hover{transform:translateY(-2px)}.dc::before{content:attr(data-n);position:absolute;top:8px;right:10px;font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--t3);opacity:.12}
+.dc h4{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px}.dc.red h4{color:var(--red)}.dc.grn h4{color:var(--grn)}.dc.amb h4{color:var(--amb)}
+.dc p{font-size:10px;line-height:1.4;color:var(--t2)}
+.cn{background:linear-gradient(135deg,rgba(255,59,92,.15),rgba(255,59,92,.05));border:1px solid rgba(255,59,92,.25);border-radius:var(--r);padding:24px 20px;text-align:center;margin-top:16px;position:relative;overflow:hidden}
+.cn::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:100px;height:3px;background:var(--red);border-radius:0 0 4px 4px}
+.cn h2{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--t1);margin-bottom:6px}
+.cn p{font-size:11px;line-height:1.65;color:var(--t2);max-width:580px;margin:0 auto}.cn strong{color:var(--red)}.cn .tg{color:var(--grn)}
+.gc{margin:14px 0;text-align:center}
+.gtr{width:100%;height:10px;background:var(--surf);border-radius:100px;position:relative;overflow:visible;margin:22px 0 30px}
+.gfn{position:absolute;top:0;height:100%;background:linear-gradient(90deg,var(--red),rgba(255,59,92,.4));border-radius:100px 0 0 100px}
+.gz{position:absolute;left:50%;top:-4px;width:2px;height:18px;background:var(--t3);border-radius:2px;transform:translateX(-50%)}
+.gm{position:absolute;top:50%;width:14px;height:14px;background:var(--red);border:2px solid var(--bg);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(255,59,92,.5);animation:pu 2s ease infinite}
+.gl{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3);margin-top:-20px;position:relative}
+.gl .c{position:absolute;left:50%;transform:translateX(-50%)}
+.gvl{position:absolute;top:-20px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--red)}
+.lg{display:flex;gap:14px;justify-content:center;margin:6px 0}
+.li{display:flex;align-items:center;gap:4px;font-size:8px;color:var(--t3)}
+.ld{width:7px;height:7px;border-radius:2px}.ld.rc{background:var(--blu)}.ld.dp{background:var(--red)}
+.bc{display:flex;align-items:flex-end;gap:6px;justify-content:center;height:140px;margin:8px 0}
+.bg{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;max-width:80px}
+.bw{display:flex;align-items:flex-end;gap:2px;height:110px;width:100%;justify-content:center}
+.br{width:14px;border-radius:3px 3px 1px 1px;position:relative;min-height:2px}
+.br.rc{background:linear-gradient(180deg,var(--blu),rgba(78,124,255,.5))}.br.dp{background:linear-gradient(180deg,var(--red),rgba(255,59,92,.5))}
+.bl{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--t3)}
+.bv{font-family:'JetBrains Mono',monospace;font-size:6px;font-weight:600;position:absolute;top:-10px;left:50%;transform:translateX(-50%);white-space:nowrap}
+.br.rc .bv{color:var(--blu)}.br.dp .bv{color:var(--red)}
+/* SPREAD GAUGE */
+.spg{margin:10px 0}.spg-row{display:flex;align-items:center;gap:8px;margin:5px 0}
+.spg-label{font-size:10px;color:var(--t2);min-width:55px;text-align:right;font-weight:500}
+.spg-track{flex:1;height:26px;background:var(--surf);border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:center}
+.spg-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 8px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--t1);min-width:fit-content;white-space:nowrap}
+.spg-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;min-width:55px;text-align:right}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.ac{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rs);padding:12px;border-left:3px solid var(--amb)}
+.ac.u{border-left-color:var(--red)}.ac.f{border-left-color:var(--grn)}
+.at{font-family:'JetBrains Mono',monospace;font-size:7px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;color:var(--amb)}
+.ac.u .at{color:var(--red)}.ac.f .at{color:var(--grn)}
+.ac h4{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:2px}
+.ac p{font-size:10px;line-height:1.4;color:var(--t2);margin:0}
+.flow{display:flex;align-items:stretch;justify-content:center;gap:2px;margin:8px 0;flex-wrap:wrap}
+.fl-box{background:var(--surf);border:1px solid var(--brd);border-radius:5px;padding:5px 6px;text-align:center;min-width:52px;flex:1;font-size:8px;font-weight:600;color:var(--t2);display:flex;flex-direction:column;justify-content:center}
+.fl-box.bad{border-color:rgba(255,59,92,.3);color:var(--red)}.fl-box.warn{border-color:rgba(255,176,32,.3);color:var(--amb)}.fl-box.ok{border-color:rgba(0,214,143,.3);color:var(--grn)}
+.fl-box small{display:block;font-size:6px;font-weight:400;color:var(--t3);margin-top:1px}
+.fl-arr{color:var(--t3);font-size:9px;display:flex;align-items:center}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pu{0%,100%{box-shadow:0 0 8px rgba(255,59,92,.5)}50%{box-shadow:0 0 16px rgba(255,59,92,.7)}}
+@media(max-width:768px){.mr{grid-template-columns:repeat(2,1fr)}.tc2,.dg,.ag{grid-template-columns:1fr}.ct{padding:14px 10px 50px}.cd,.cn{padding:14px 10px}.tabs{flex-direction:column}.flow{flex-direction:column}.fl-arr{transform:rotate(90deg)}}
+
+[contenteditable="true"]{outline:none;border-radius:3px;transition:background .15s,box-shadow .15s;}
+[contenteditable="true"]:hover{background:rgba(0,214,143,0.07);cursor:text;}
+[contenteditable="true"]:focus{background:rgba(0,214,143,0.11);box-shadow:0 0 0 1.5px rgba(0,214,143,0.35);}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+</head>
+<body>
+
+<a href="../index.html" style="position:fixed;top:16px;left:16px;z-index:9999;background:rgba(11,26,59,0.88);border:1px solid rgba(255,255,255,0.08);color:#00d68f;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;padding:8px 16px;border-radius:100px;text-decoration:none;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;" onmouseover="this.style.borderColor='#00d68f'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">← Lummen CFO</a>
+
+<div class="ct">
+<div class="hd">
+  <div class="tag">Relatório CFO · Versão Definitiva</div>
+  <h1>Análise de ROCE</h1>
+  <p>Operação de Ativos Judiciais — Abr/25 a Fev/26 · Sem pró-labore</p>
+</div>
+<div class="tabs">
+  <button class="tb on" onclick="sw(this,'t1')">📐 ROCE do Exercício</button>
+  <button class="tb" onclick="sw(this,'t2')">📊 Histórico Mensal</button>
+  <button class="tb" onclick="sw(this,'t3')">📈 Volume × Spread</button>
+  <button class="tb" onclick="sw(this,'t4')">🎯 Análise de Cenários</button>
+</div>
+
+<!-- ===== TAB 1: ROCE DO EXERCÍCIO ===== -->
+<div id="t1" class="tc on">
+<div class="note"><strong>Período:</strong> Abr/25 a Fev/26 (11 meses) · Sem pró-labore · Capital operacional real</div>
+<div class="mr">
+  <div class="mc r"><div class="ml">ROCE</div><div class="mv r">-13,3%</div><div class="ms">Do exercício</div></div>
+  <div class="mc r"><div class="ml">EBIT</div><div class="mv r">-R$ 364k</div><div class="ms">11 meses</div></div>
+  <div class="mc a"><div class="ml">Rec. Líquida</div><div class="mv a">R$ 2,12M</div><div class="ms">11 meses</div></div>
+  <div class="mc b"><div class="ml">Capital</div><div class="mv b">R$ 2,73M</div><div class="ms">Empregado</div></div>
+</div>
+
+<div class="sec"><div class="sh"><span class="sn">01</span><span class="st">Capital Empregado</span><span class="sl"></span></div>
+<div class="cd">
+<table class="dt"><thead><tr><th>Composição</th><th>Valor (R$)</th></tr></thead><tbody>
+<tr><td>Investimento Inicial</td><td>1.200.000,00</td></tr>
+<tr><td>Empréstimo Diretoria</td><td>567.128,73</td></tr>
+<tr><td>Empréstimo Tecnologia</td><td>85.640,70</td></tr>
+<tr><td>Empréstimo de Terceiros</td><td>880.000,00</td></tr>
+<tr class="tr"><td>Capital Empregado Operacional</td><td>2.732.769,43</td></tr>
+</tbody></table>
+</div></div>
+
+<div class="sec"><div class="sh"><span class="sn">02</span><span class="st">DRE e Cálculo do ROCE</span><span class="sl"></span></div>
+<div class="cd">
+<div class="math">
+<h4>Resultado Operacional — 11 Meses</h4>
+<div class="math-row"><span>Receita Líquida</span><span>R$ 2.121.391,94</span></div>
+<div class="math-row"><span>Despesas Totais</span><span style="color:var(--red)">R$ 2.485.117,40</span></div>
+<div class="math-row"><span style="color:var(--t1);font-weight:700">EBIT</span><span style="color:var(--red)">– R$ 363.725,46</span></div>
+</div>
+<div class="fb"><div class="fm">ROCE = –363.725 ÷ 2.732.769 = <span style="color:var(--red)">–13,31%</span></div></div>
+<div class="gc"><div class="gtr"><div class="gfn" style="right:50%;width:13.3%"></div><div class="gz"></div><div class="gm" style="left:36.7%"></div><div class="gvl" style="left:36.7%">–13,3%</div></div><div class="gl"><span>–50%</span><span class="c" style="position:absolute;left:50%;transform:translateX(-50%)">0%</span><span>+50%</span></div></div>
+</div></div>
+
+<div class="sec"><div class="sh"><span class="sn">03</span><span class="st">Interpretação Executiva</span><span class="sl"></span></div>
+<div class="cd">
+<div class="ab"><h3>ROCE = –13,3% → DESTRUIÇÃO DE VALOR</h3><p>Para cada <strong>R$ 1,00</strong> investido, a operação destruiu <strong>R$ 0,13</strong> de valor operacional no período.</p></div>
+<div class="dg">
+<div class="dc red" data-n="01"><h4>Margem Operacional: –17,1%</h4><p>–363.725 ÷ 2.121.392 = <strong style="color:var(--red)">–17,1%</strong>. A operação gera receita mas a estrutura consome mais do que entra.</p></div>
+<div class="dc red" data-n="02"><h4>Gap Mensal: –R$ 33k</h4><p>Receita média: R$ 193k/mês. Despesa média: R$ 226k/mês. Falta <strong style="color:var(--red)">R$ 33k/mês</strong> só para empatar.</p></div>
+<div class="dc amb" data-n="03"><h4>"Girando mas não sobra"</h4><p>O burn alto, sócios sem retirada e pressão de caixa são sintomas diretos de um ROCE negativo persistente.</p></div>
+<div class="dc amb" data-n="04"><h4>Problema Estrutural</h4><p>A operação de ativos <strong>pode ter margem</strong>. Mas a estrutura da empresa <strong>consome mais do que gera</strong>.</p></div>
+</div>
+</div></div>
+
+<div class="sec"><div class="sh"><span class="sn">04</span><span class="st">Meta ROCE 15%</span><span class="sl"></span></div>
+<div class="cd">
+<div class="math">
+<h4>O que seria necessário</h4>
+<div class="math-row"><span>Capital × 15%</span><span>R$ 409.915 / ano</span></div>
+<div class="math-row"><span>EBIT necessário/mês</span><span style="color:var(--grn)">R$ 34.160</span></div>
+<div class="math-row"><span>Receita necessária/mês (mantendo desp.)</span><span style="color:var(--grn)">R$ 260k</span></div>
+<div class="math-row"><span>Receita atual/mês</span><span>R$ 193k</span></div>
+<div class="math-row"><span style="color:var(--t1);font-weight:700">Aumento necessário</span><span style="color:var(--amb)">+35%</span></div>
+</div>
+<div class="ab grn"><h3>EBIT MÍNIMO: R$ 34K/MÊS</h3><p>Para remunerar o capital a 15% a.a., a operação precisa de <strong style="color:var(--grn)">R$ 34 mil de lucro operacional por mês</strong>. Abaixo: destrói valor. Acima: cria valor.</p></div>
+</div></div>
+
+<div class="cn"><h2>Diagnóstico</h2><p>O exercício inteiro destruiu capital. ROCE <strong>–13,3%</strong> com margem operacional de <strong>–17,1%</strong>. O capital não é o problema — a estrutura consome mais do que a operação gera. Meta: <span class="tg"><strong>+R$ 34k/mês de EBIT</strong></span> para começar a criar valor.</p></div>
+</div>
+
+<!-- ===== TAB 2: HISTÓRICO MENSAL ===== -->
+<div id="t2" class="tc">
+<div class="mr">
+  <div class="mc a"><div class="ml">Spread Médio</div><div class="mv a">6,8%</div><div class="ms">Período</div></div>
+  <div class="mc r"><div class="ml">Exec. Meta</div><div class="mv r">56%</div><div class="ms">34,7M de 62,4M</div></div>
+  <div class="mc a"><div class="ml">Rec. Média</div><div class="mv a">R$ 193k</div><div class="ms">/mês</div></div>
+  <div class="mc r"><div class="ml">Desp. Média</div><div class="mv r">R$ 226k</div><div class="ms">/mês</div></div>
+</div>
+<div class="sec"><div class="sh"><span class="sn">01</span><span class="st">Receita vs Meta — Meses com Dados</span><span class="sl"></span></div>
+<div class="cd">
+<table class="dt"><thead><tr><th>Período</th><th>Meta Ativos</th><th>Realizada</th><th>Spread</th><th>Rec. Bruta</th><th>%Meta</th></tr></thead><tbody>
+<tr><td>Set/25</td><td>6,5M</td><td class="ps">11,1M</td><td>6,4%</td><td>706k</td><td class="ps">170%</td></tr>
+<tr><td>Out/25</td><td>10,2M</td><td class="ng">6,5M</td><td>4,7%</td><td>304k</td><td class="ng">64%</td></tr>
+<tr><td>Nov/25</td><td>11,1M</td><td class="ng">4,8M</td><td>8,1%</td><td>392k</td><td class="ng">44%</td></tr>
+<tr><td>Dez/25</td><td>11,8M</td><td class="ng">4,9M</td><td>8,7%</td><td>426k</td><td class="ng">42%</td></tr>
+<tr><td>Jan/26</td><td>12,4M</td><td class="ng">2,1M</td><td>7,0%</td><td>144k</td><td class="ng">17%</td></tr>
+<tr><td>Fev/26</td><td>10,5M</td><td class="ng">5,3M</td><td>5,7%</td><td>351k</td><td class="ng">51%</td></tr>
+<tr class="tr"><td>TOTAL</td><td>62,4M</td><td class="ng">34,7M</td><td>6,8%</td><td>2,32M</td><td class="ng">56%</td></tr>
+</tbody></table>
+<div class="lg"><div class="li"><div class="ld rc"></div>Receita</div><div class="li"><div class="ld dp"></div>Despesas (s/ pról.)</div></div>
+<div class="bc">
+  <div class="bg"><div class="bw"><div class="br rc" style="height:94%"><div class="bv">706k</div></div><div class="br dp" style="height:0%"></div></div><div class="bl">Set</div></div>
+  <div class="bg"><div class="bw"><div class="br rc" style="height:41%"><div class="bv">304k</div></div><div class="br dp" style="height:4%"><div class="bv">27k</div></div></div><div class="bl">Out</div></div>
+  <div class="bg"><div class="bw"><div class="br rc" style="height:52%"><div class="bv">392k</div></div><div class="br dp" style="height:30%"><div class="bv">226k</div></div></div><div class="bl">Nov</div></div>
+  <div class="bg"><div class="bw"><div class="br rc" style="height:57%"><div class="bv">426k</div></div><div class="br dp" style="height:100%"><div class="bv">781k</div></div></div><div class="bl">Dez</div></div>
+  <div class="bg"><div class="bw"><div class="br rc" style="height:19%"><div class="bv">144k</div></div><div class="br dp" style="height:39%"><div class="bv">303k</div></div></div><div class="bl">Jan</div></div>
+  <div class="bg"><div class="bw"><div class="br rc" style="height:47%"><div class="bv">351k</div></div><div class="br dp" style="height:69%"><div class="bv">540k</div></div></div><div class="bl">Fev</div></div>
+</div></div></div>
+<div class="cn"><h2>Tendência</h2><p>Único mês acima da meta foi Set/25. Desde então, <strong>execução decrescente</strong>. Jan/26 foi o pior mês (17% da meta). A estrutura de despesas passou a superar a receita a partir de <strong>Nov/25</strong>.</p></div>
+</div>
+
+<!-- ===== TAB 3: VOLUME × SPREAD ===== -->
+<div id="t3" class="tc">
+<div class="mr">
+  <div class="mc g"><div class="ml">EBIT Meta</div><div class="mv g">R$ 34k</div><div class="ms">/mês (ROCE 15%)</div></div>
+  <div class="mc r"><div class="ml">Spread Atual</div><div class="mv r">6,8%</div><div class="ms">Média real</div></div>
+  <div class="mc a"><div class="ml">Capacidade</div><div class="mv a">400–575k</div><div class="ms">Giro comercial</div></div>
+  <div class="mc b"><div class="ml">Var. Chave</div><div class="mv b">Spread</div><div class="ms">Máx. sensibilidade</div></div>
+</div>
+
+<div class="sec"><div class="sh"><span class="sn">01</span><span class="st">Volume Necessário por Nível de Spread</span><span class="sl"></span></div>
+<div class="cd">
+<p>Para gerar EBIT de R$ 34k/mês, qual volume mensal de ativos é necessário em cada nível de spread:</p>
+<div class="math">
+<h4>EBIT Meta ÷ Spread = Volume Necessário</h4>
+<div class="math-row"><span>Spread 5%</span><span style="color:var(--red)">R$ 683k/mês</span></div>
+<div class="math-row"><span>Spread 7%</span><span style="color:var(--amb)">R$ 488k/mês</span></div>
+<div class="math-row"><span>Spread 8%</span><span style="color:var(--amb)">R$ 427k/mês</span></div>
+<div class="math-row"><span>Spread 9%</span><span style="color:var(--grn)">R$ 380k/mês</span></div>
+<div class="math-row"><span>Spread 10%</span><span style="color:var(--grn)">R$ 342k/mês</span></div>
+<div class="math-row"><span>Spread 12%</span><span style="color:var(--blu)">R$ 285k/mês</span></div>
+</div>
+
+<div class="spg">
+<div class="spg-row"><div class="spg-label">Spread 5%</div><div class="spg-track"><div class="spg-fill" style="width:100%;background:linear-gradient(90deg,var(--red),rgba(255,59,92,.5))">R$ 683k</div></div><div class="spg-tag" style="color:var(--red)">❌ Não fecha</div></div>
+<div class="spg-row"><div class="spg-label">Spread 7%</div><div class="spg-track"><div class="spg-fill" style="width:71%;background:linear-gradient(90deg,var(--amb),rgba(255,176,32,.5))">R$ 488k</div></div><div class="spg-tag" style="color:var(--amb)">⚠️ Pressão</div></div>
+<div class="spg-row"><div class="spg-label">Spread 9%</div><div class="spg-track"><div class="spg-fill" style="width:56%;background:linear-gradient(90deg,var(--grn),rgba(0,214,143,.5))">R$ 380k</div></div><div class="spg-tag" style="color:var(--grn)">✅ Confortável</div></div>
+<div class="spg-row"><div class="spg-label">Spread 12%</div><div class="spg-track"><div class="spg-fill" style="width:42%;background:linear-gradient(90deg,var(--blu),rgba(78,124,255,.5))">R$ 285k</div></div><div class="spg-tag" style="color:var(--blu)">🎯 Ideal</div></div>
+</div></div></div>
+
+<div class="sec"><div class="sh"><span class="sn">02</span><span class="st">Diagnóstico por Spread</span><span class="sl"></span></div>
+<div class="cd">
+<p>Com capacidade comercial entre <strong>R$ 400k e R$ 575k/mês</strong>:</p>
+<div class="dg">
+<div class="dc red" data-n="5%"><h4>Spread 5% → Inviável</h4><p>Precisa girar R$ 683k/mês — <strong>acima da capacidade máxima</strong>. Operação destruirá valor independente do volume.</p></div>
+<div class="dc amb" data-n="7%"><h4>Spread 7% → Pressionado</h4><p>Precisa girar R$ 488k/mês — possível mas no limite. <strong>Qualquer queda de volume leva a prejuízo.</strong></p></div>
+<div class="dc grn" data-n="9%"><h4>Spread 9% → Confortável</h4><p>Precisa girar R$ 380k/mês — <strong>dentro da capacidade</strong>. Margem de segurança de ~R$ 100k.</p></div>
+<div class="dc grn" data-n="12%"><h4>Spread 12% → Ideal</h4><p>Precisa girar apenas R$ 285k/mês — <strong>ROCE saudável mesmo com volume baixo</strong>.</p></div>
+</div>
+</div></div>
+
+<div class="sec"><div class="sh"><span class="sn">03</span><span class="st">A Variável Mais Sensível</span><span class="sl"></span></div>
+<div class="cd">
+<div class="ab blu"><h3>SPREAD É A VARIÁVEL DECISIVA</h3><p>Se o spread cair para <strong style="color:var(--red)">5%</strong>, a operação volta a destruir valor — mesmo com giro máximo. Se subir para <strong style="color:var(--grn)">9%</strong>, o ROCE fica saudável <strong>sem crescimento agressivo</strong>. A diferença entre viabilidade e inviabilidade são <strong>2–3 pontos percentuais de spread</strong>.</p></div>
+</div></div>
+
+<div class="cn"><h2>Conclusão</h2><p>A operação <span class="tg"><strong>não é inviável pelo tamanho do capital</strong></span>. Depende de: <span class="tg"><strong>spread médio real acima de 7%</strong></span>, controle rígido de estrutura fixa, e giro consistente acima de <span class="tg"><strong>R$ 480k/mês</strong></span>. A margem (spread) é a alavanca mais poderosa.</p></div>
+</div>
+
+<!-- ===== TAB 4: ANÁLISE DE CENÁRIOS ===== -->
+<div id="t4" class="tc">
+<div class="note"><strong>Base:</strong> Receita R$ 2.121.392 · Despesas R$ 2.485.117 · EBIT –R$ 363.725 · Capital R$ 2.732.769 · ROCE –13,3% · Período 11 meses (Abr/25–Fev/26)</div>
+
+<div class="sec"><div class="sh"><span class="sn">A</span><span class="st">Cenário: Só Corte de Despesas</span><span class="sl"></span></div>
+<div class="cd">
+<p>Mantendo receita atual, qual impacto dos cortes:</p>
+<table class="sc"><thead><tr><th>Corte</th><th>Desp. 11M</th><th>EBIT</th><th>ROCE</th><th>Status</th></tr></thead><tbody>
+<tr><td>Atual (0%)</td><td>R$ 2,49M</td><td class="vr">–R$ 364k</td><td class="vr">–13,3%</td><td class="vr">Destrói</td></tr>
+<tr><td>Corte 10%</td><td>R$ 2,24M</td><td class="vr">–R$ 115k</td><td class="vr">–4,2%</td><td class="va">Reduz perda</td></tr>
+<tr class="hr"><td>Corte 20%</td><td>R$ 1,99M</td><td class="vg">+R$ 133k</td><td class="vg">+4,9%</td><td class="vg">Empata</td></tr>
+<tr><td>Corte 30%</td><td>R$ 1,74M</td><td class="vg">+R$ 382k</td><td class="vg">+14,0%</td><td class="vg">Quase saudável</td></tr>
+<tr><td>Corte 40%</td><td>R$ 1,49M</td><td class="vg">+R$ 630k</td><td class="vg">+23,1%</td><td class="vg">Saudável</td></tr>
+</tbody></table>
+<p><strong style="color:var(--amb)">Insight:</strong> Corte de ~15% já empata. Para ROCE 15%+, precisa cortar ~30%.</p>
+</div></div>
+
+<div class="sec"><div class="sh"><span class="sn">B</span><span class="st">Cenário: Só Aumento de Receita</span><span class="sl"></span></div>
+<div class="cd">
+<p>Mantendo despesas, qual aumento de receita necessário:</p>
+<table class="sc"><thead><tr><th>Aumento</th><th>Rec. 11M</th><th>EBIT</th><th>ROCE</th><th>Status</th></tr></thead><tbody>
+<tr><td>Atual (0%)</td><td>R$ 2,12M</td><td class="vr">–R$ 364k</td><td class="vr">–13,3%</td><td class="vr">Destrói</td></tr>
+<tr><td>+15%</td><td>R$ 2,44M</td><td class="vr">–R$ 46k</td><td class="vr">–1,7%</td><td class="va">Quase empata</td></tr>
+<tr class="hr"><td>+20%</td><td>R$ 2,55M</td><td class="vg">+R$ 61k</td><td class="vg">+2,2%</td><td class="vg">Empata</td></tr>
+<tr><td>+30%</td><td>R$ 2,76M</td><td class="vg">+R$ 273k</td><td class="vg">+10,0%</td><td class="vg">Cria valor</td></tr>
+<tr><td>+50%</td><td>R$ 3,18M</td><td class="vg">+R$ 697k</td><td class="vg">+25,5%</td><td class="vg">Saudável</td></tr>
+</tbody></table>
+<p><strong style="color:var(--amb)">Insight:</strong> +17% de receita empata. Para ROCE 15%+, aumento de ~35%.</p>
+</div></div>
+
+<div class="sec"><div class="sh"><span class="sn">C</span><span class="st">Cenário: Combo Corte + Receita</span><span class="sl"></span></div>
+<div class="cd">
+<p>A alavanca mais realista — ação nos dois lados:</p>
+<table class="sc"><thead><tr><th>Combo</th><th>Desp./mês</th><th>Rec./mês</th><th>EBIT 11M</th><th>ROCE</th></tr></thead><tbody>
+<tr class="hr"><td>Corte 10% + Rec +20%</td><td>R$ 203k</td><td>R$ 231k</td><td class="vg">+R$ 309k</td><td class="vg">+11,3%</td></tr>
+<tr><td>Corte 15% + Rec +25%</td><td>R$ 192k</td><td>R$ 241k</td><td class="vg">+R$ 539k</td><td class="vg">+19,7%</td></tr>
+<tr><td>Corte 20% + Rec +30%</td><td>R$ 181k</td><td>R$ 251k</td><td class="vg">+R$ 770k</td><td class="vg">+28,2%</td></tr>
+</tbody></table>
+<div class="ab grn"><h3>CENÁRIO RECOMENDADO</h3><p>Com <strong>corte de 15%</strong> na estrutura + <strong>aumento de 25%</strong> na receita: despesa de R$ 192k/mês + receita de R$ 241k/mês = <strong style="color:var(--grn)">ROCE de 19,7%</strong>. Viável. Próximo do saudável.</p></div>
+</div></div>
+
+<div class="sec"><div class="sh"><span class="sn">D</span><span class="st">Decisão Estratégica</span><span class="sl"></span></div>
+<div class="cd">
+<div class="ag">
+<div class="ac u"><div class="at">ALAVANCA 1 — SPREAD</div><h4>Piso de 8% — Recusar abaixo</h4><p>Variável mais sensível. Diferença entre 5% e 9% é a diferença entre destruição e criação de valor. Cada ponto percentual de spread adicional reduz o volume necessário em ~R$ 50k/mês.</p></div>
+<div class="ac u"><div class="at">ALAVANCA 2 — ESTRUTURA</div><h4>Controle rígido de custo fixo</h4><p>Meta: reduzir de R$ 226k para R$ 192k/mês (–15%). Consolidar tech, renegociar contratos, enxugar folha operacional.</p></div>
+<div class="ac f"><div class="at">ALAVANCA 3 — GIRO</div><h4>Giro consistente acima de R$ 480k/mês</h4><p>Alinhar critérios com jurídico (reduzir reprovação de 65%), pipeline semanal, reduzir ciclo cash.</p></div>
+<div class="ac f"><div class="at">GO / NO-GO — 60 DIAS</div><h4>Medir ROCE mensal real</h4><p>Se após 60 dias de ajuste o EBIT mensal não atingir R$ 34k+ (ROCE 15%): decisão estratégica sobre continuidade.</p></div>
+</div>
+</div></div>
+
+<div class="cn"><h2>Conclusão — Análise de Cenários</h2><p>A operação <span class="tg"><strong>não é inviável</strong></span>. O gap mensal é de <strong>R$ 33k</strong> — não é intransponível. Combo de <span class="tg"><strong>corte 15% + receita +25%</strong></span> leva a ROCE de <span class="tg"><strong>19,7%</strong></span>. A variável mais sensível é o <strong>spread</strong>: acima de 9% a conta fecha, abaixo de 5% não tem como fechar. A decisão estratégica é: garantir spread mínimo de 8%, controlar estrutura, e gerar giro consistente.</p></div>
+</div>
+
+</div>
+<script>function sw(b,id){document.querySelectorAll('.tc').forEach(e=>e.classList.remove('on'));document.querySelectorAll('.tb').forEach(e=>e.classList.remove('on'));document.getElementById(id).classList.add('on');b.classList.add('on')}</script>
+
+<!-- ── FIREBASE AUTO-SAVE ──────────────────────────────────────────────── -->
+<div id="fb-indicator" style="position:fixed;bottom:80px;right:24px;background:rgba(0,214,143,0.1);border:1px solid rgba(0,214,143,0.35);color:#00d68f;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;padding:8px 18px;border-radius:100px;opacity:0;transition:opacity 0.4s;pointer-events:none;z-index:9999;">✓ SALVO</div>
+<div id="fb-loading" style="position:fixed;bottom:80px;right:24px;background:rgba(78,124,255,0.1);border:1px solid rgba(78,124,255,0.35);color:#4e7cff;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;padding:8px 18px;border-radius:100px;opacity:1;transition:opacity 0.4s;pointer-events:none;z-index:9999;">↓ CARREGANDO</div>
+<script>
+  firebase.initializeApp({ apiKey:"AIzaSyCJybzPDCyB8IaOhjZKMtJiOpoRFz8XtpY", authDomain:"lummencfo.firebaseapp.com", projectId:"lummencfo", storageBucket:"lummencfo.firebasestorage.app", messagingSenderId:"362932670316", appId:"1:362932670316:web:82690d58e55f8570476d49" });
+  const _db = firebase.firestore();
+  const _DOC = _db.collection('plano').doc('roce-diagnostico');
+  const _SKIP = new Set(['BUTTON','SCRIPT','STYLE','SVG','PATH','RECT','CIRCLE','POLYLINE','POLYGON','LINE','G','DEFS','SYMBOL','USE','BR','WBR']);
+  function _isLeaf(el){ if(_SKIP.has(el.tagName)) return false; if(el.closest('button')) return false; if([...el.children].some(c=>!_SKIP.has(c.tagName))) return false; return el.textContent.trim().length>0; }
+  const _els=[]; let _gi=0;
+  document.querySelectorAll('body > *:not(a)').forEach(sec=>{ sec.querySelectorAll('*').forEach(el=>{ if(!_isLeaf(el)) return; const k='r'+_gi++; el.setAttribute('data-fb',k); el.contentEditable='true'; el.spellcheck=false; _els.push(el); }); });
+  _els.forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();el.blur();} }));
+  const _load=document.getElementById('fb-loading'), _ind=document.getElementById('fb-indicator');
+  _DOC.get().then(s=>{ if(s.exists){ const d=s.data(); _els.forEach(el=>{ const k=el.getAttribute('data-fb'); if(d[k]!==undefined) el.textContent=d[k]; }); } _load.style.opacity='0'; }).catch(()=>_load.style.opacity='0');
+  let _t=null;
+  function _save(){ clearTimeout(_t); _t=setTimeout(()=>{ const p={}; _els.forEach(el=>p[el.getAttribute('data-fb')]=el.textContent.trim()); _DOC.set(p,{merge:true}).then(()=>{ _ind.style.opacity='1'; setTimeout(()=>_ind.style.opacity='0',2000); }); },800); }
+  _els.forEach(el=>el.addEventListener('input',_save));
+</script>
+</body>
+</html>

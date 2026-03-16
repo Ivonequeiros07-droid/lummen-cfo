@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lummen — Análise Operacional 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:     #0B1527;
+    --navy2:    #111E35;
+    --blue:     #1B4FD8;
+    --blue-lt:  #2E6AF6;
+    --gold:     #D4A843;
+    --gold-lt:  #F0C96A;
+    --red:      #C0392B;
+    --green:    #1A7A5E;
+    --green-lt: #26A87F;
+    --muted:    #8899BB;
+    --border:   rgba(255,255,255,0.07);
+    --card:     rgba(255,255,255,0.04);
+    --card2:    rgba(255,255,255,0.07);
+    --white:    #F4F7FF;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--navy); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
+
+  /* HERO */
+  .hero { position: relative; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 5rem 6rem 4rem; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; z-index: 0; background: radial-gradient(ellipse 80% 60% at 70% 30%, rgba(27,79,216,0.18) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 80%, rgba(212,168,67,0.08) 0%, transparent 60%), linear-gradient(175deg, #0B1527 0%, #0D1A2F 100%); }
+  .hero-grid { position: absolute; inset: 0; z-index: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 80px 80px; mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%); }
+  .hero-line { position: absolute; top: 0; left: 6rem; width: 1px; height: 60%; background: linear-gradient(180deg, transparent, var(--gold), transparent); opacity: 0.4; animation: pulse-line 4s ease-in-out infinite; }
+  @keyframes pulse-line { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.6; } }
+  .hero-content { position: relative; z-index: 1; max-width: 900px; }
+  .hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.25em; color: var(--gold); text-transform: uppercase; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; opacity: 0; animation: fade-up 0.8s 0.2s forwards; }
+  .hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--gold); }
+  .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; margin-bottom: 1.5rem; opacity: 0; animation: fade-up 0.8s 0.4s forwards; }
+  .hero h1 span { display: block; color: var(--gold); font-style: italic; font-weight: 600; }
+  .hero-sub { font-size: 1.1rem; color: var(--muted); max-width: 560px; font-weight: 300; opacity: 0; animation: fade-up 0.8s 0.6s forwards; margin-bottom: 3rem; }
+  .hero-stats { display: flex; gap: 3rem; opacity: 0; animation: fade-up 0.8s 0.8s forwards; flex-wrap: wrap; }
+  .hero-stat-item { border-top: 1px solid var(--border); padding-top: 1rem; min-width: 140px; }
+  .hero-stat-num { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 700; line-height: 1; margin-bottom: 0.25rem; }
+  .hero-stat-num.neg { color: #E74C3C; }
+  .hero-stat-num.pos { color: var(--green-lt); }
+  .hero-stat-num.gold { color: var(--gold); }
+  .hero-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); }
+  .scroll-hint { position: absolute; bottom: 2rem; right: 6rem; display: flex; align-items: center; gap: 0.5rem; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: fade-up 0.8s 1.2s forwards; }
+  .scroll-hint::after { content: '↓'; animation: bounce 2s ease-in-out infinite; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+
+  /* SHARED */
+  section { position: relative; z-index: 1; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 6rem; }
+  .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; line-height: 1.1; }
+  .section-desc { color: var(--muted); font-size: 0.9rem; max-width: 340px; text-align: right; }
+
+  /* CARDS */
+  .cards-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .cards-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .kpi-card { background: var(--card); padding: 2rem; transition: background 0.2s; }
+  .kpi-card:hover { background: var(--card2); }
+  .kpi-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 0.75rem; }
+  .kpi-value { font-family: 'Syne', sans-serif; font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 700; line-height: 1; margin-bottom: 0.5rem; }
+  .kpi-sub { font-size: 12px; color: var(--muted); }
+  .kpi-badge { display: inline-block; margin-top: 0.5rem; padding: 2px 8px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 11px; }
+  .badge-red { background: rgba(192,57,43,0.2); color: #E74C3C; }
+  .badge-green { background: rgba(26,122,94,0.2); color: var(--green-lt); }
+  .badge-gold { background: rgba(212,168,67,0.15); color: var(--gold-lt); }
+  .badge-blue { background: rgba(46,106,246,0.2); color: #5B8FF9; }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 0; }
+  .timeline-item { display: grid; grid-template-columns: 120px 1fr; gap: 2.5rem; padding: 2.5rem 0; border-bottom: 1px solid var(--border); opacity: 0; transform: translateX(-16px); transition: opacity 0.5s, transform 0.5s; }
+  .timeline-item.visible { opacity: 1; transform: translateX(0); }
+  .timeline-month { text-align: right; padding-top: 0.2rem; }
+  .timeline-month-name { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; line-height: 1; margin-bottom: 0.25rem; }
+  .timeline-month-ops { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .timeline-body { padding-left: 1rem; border-left: 1px solid var(--border); }
+  .bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+  .bar-label { font-size: 11px; color: var(--muted); width: 80px; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .bar-fill.receita { background: linear-gradient(90deg, var(--green), var(--green-lt)); }
+  .bar-fill.despesa { background: linear-gradient(90deg, var(--red), #E74C3C); }
+  .bar-val { font-family: 'DM Mono', monospace; font-size: 11px; width: 120px; flex-shrink: 0; }
+  .timeline-result { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Mono', monospace; font-size: 13px; margin-top: 0.75rem; }
+  .no-revenue { color: var(--muted); font-size: 13px; padding: 0.5rem 0; font-style: italic; }
+
+  /* COST TABLE */
+  .cost-table { width: 100%; border-collapse: collapse; }
+  .cost-table tr { border-bottom: 1px solid var(--border); }
+  .cost-table tr:last-child { border-bottom: none; }
+  .cost-table td { padding: 1rem 0; vertical-align: middle; }
+  .cost-name { font-weight: 500; font-size: 13px; }
+  .cost-bar-cell { width: 40%; padding: 1rem 2rem; }
+  .cost-bar-wrap { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .cost-bar-inner { height: 100%; background: linear-gradient(90deg, var(--blue), var(--blue-lt)); border-radius: 2px; }
+  .cost-pct { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); text-align: right; width: 50px; }
+  .cost-val { font-family: 'DM Mono', monospace; font-size: 12px; text-align: right; width: 140px; }
+
+  /* DIAGNOSTIC */
+  .diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .diag-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 2rem; transition: border-color 0.2s, background 0.2s; }
+  .diag-card:hover { background: var(--card2); border-color: rgba(255,255,255,0.12); }
+  .diag-icon { font-size: 1.5rem; margin-bottom: 1rem; }
+  .diag-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .diag-text { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .diag-text strong { color: var(--white); }
+  .diag-card.positive { border-color: rgba(26,122,94,0.3); }
+  .diag-card.negative { border-color: rgba(192,57,43,0.25); }
+  .diag-card.warning { border-color: rgba(212,168,67,0.25); }
+
+  /* WATERFALL */
+  .waterfall { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .wf-row { display: grid; grid-template-columns: 1fr auto auto; gap: 2rem; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); align-items: center; transition: background 0.2s; }
+  .wf-row:hover { background: var(--card2); }
+  .wf-row:last-child { border-bottom: none; }
+  .wf-row.total { background: rgba(27,79,216,0.1); }
+  .wf-row.total-neg { background: rgba(192,57,43,0.1); }
+  .wf-row.section { background: rgba(212,168,67,0.05); }
+  .wf-label { font-size: 13px; }
+  .wf-label.indent { padding-left: 1.5rem; color: var(--muted); font-size: 12px; }
+  .wf-section-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold); }
+  .wf-val { font-family: 'DM Mono', monospace; font-size: 13px; text-align: right; white-space: nowrap; }
+  .wf-val.pos { color: var(--green-lt); }
+  .wf-val.neg { color: #E74C3C; }
+  .wf-val.gold { color: var(--gold-lt); }
+  .wf-val.bold { font-weight: 700; font-size: 14px; }
+  .wf-bar-cell { width: 160px; }
+  .wf-bar-bg { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .wf-bar-fill { height: 100%; border-radius: 2px; }
+  .wf-bar-fill.green { background: var(--green-lt); }
+  .wf-bar-fill.red { background: #E74C3C; }
+  .wf-bar-fill.gold { background: var(--gold); }
+
+  /* OUTLOOK */
+  .outlook-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; align-items: start; }
+  .outlook-text { font-size: 1.05rem; color: var(--muted); line-height: 1.8; }
+  .outlook-text strong { color: var(--white); font-weight: 500; }
+  .outlook-text p + p { margin-top: 1.25rem; }
+  .outlook-metrics { display: flex; flex-direction: column; gap: 1rem; }
+  .outlook-metric { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; }
+  .outlook-metric-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 0.4rem; }
+  .outlook-metric-val { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; }
+
+  /* FOOTER */
+  footer { margin-top: 6rem; padding: 3rem 6rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .footer-brand { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; color: var(--gold); }
+  .footer-note { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+
+  /* ANIMATIONS */
+  @keyframes fade-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s, transform 0.6s; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    .hero, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .container { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .cards-4 { grid-template-columns: repeat(2, 1fr); }
+    .cards-3, .cards-2, .diag-grid, .outlook-grid { grid-template-columns: 1fr; }
+    .hero-line { left: 1.5rem; }
+    .timeline-item { grid-template-columns: 80px 1fr; gap: 1rem; }
+    .section-header { flex-direction: column; gap: 0.5rem; }
+    .section-desc { text-align: left; max-width: 100%; }
+  }
+
+  [contenteditable="true"] { outline: none; border-radius: 3px; transition: background 0.15s, box-shadow 0.15s; }
+  [contenteditable="true"]:hover { background: rgba(0,212,160,0.07); cursor: text; }
+  [contenteditable="true"]:focus { background: rgba(0,212,160,0.11); box-shadow: 0 0 0 1.5px rgba(0,212,160,0.35); }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+</head>
+<body>
+
+<a href="../index.html" style="position:fixed;top:16px;left:16px;z-index:9999;background:rgba(2,11,24,0.88);border:1px solid #0d2640;color:#00d4a0;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;padding:8px 16px;border-radius:100px;text-decoration:none;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;" onmouseover="this.style.borderColor='#00d4a0'" onmouseout="this.style.borderColor='#0d2640'">← Lummen CFO</a>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-line"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Lummen Ativos Judiciais · Relatório Executivo</div>
+    <h1>Análise<br>Operacional<span>2025</span></h1>
+    <p class="hero-sub">Ano de estruturação: montagem da infraestrutura, escala no segundo semestre e diagnóstico do gap receita–despesa.</p>
+    <div class="hero-stats">
+      <div class="hero-stat-item">
+        <div class="hero-stat-num gold">57</div>
+        <div class="hero-stat-label">Cessões realizadas</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num gold">6,2%</div>
+        <div class="hero-stat-label">Margem média</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num neg">−R$ 6,25M</div>
+        <div class="hero-stat-label">Déficit operacional</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num pos">8,2%</div>
+        <div class="hero-stat-label">Margem em Dezembro</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">Rolar para análise</div>
+</section>
+
+<!-- 01 · KPIs -->
+<section style="padding: 5rem 0 2rem;">
+  <div class="container">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-num">01 · Indicadores-Chave</div>
+        <div class="section-title">Números do Ano</div>
+      </div>
+      <div class="section-desc">Visão consolidada dos principais indicadores financeiros e operacionais de 2025.</div>
+    </div>
+    <div class="cards-4 reveal">
+      <div class="kpi-card">
+        <div class="kpi-label">Receita Operacional</div>
+        <div class="kpi-value" style="color:var(--green-lt);">R$ 1,74M</div>
+        <div class="kpi-sub">Margem líquida das cessões</div>
+        <div class="kpi-badge badge-green">22% das despesas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Despesas Pagas</div>
+        <div class="kpi-value" style="color:#E74C3C;">R$ 7,99M</div>
+        <div class="kpi-sub">Total desembolsado no ano</div>
+        <div class="kpi-badge badge-red">4,6× a receita</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Capital Injetado</div>
+        <div class="kpi-value" style="color:var(--gold-lt);">R$ 3,0M</div>
+        <div class="kpi-sub">Aportes Abr + Ago + Empréstimo</div>
+        <div class="kpi-badge badge-gold">3 injeções no ano</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Passivo Total</div>
+        <div class="kpi-value" style="color:#E74C3C;">R$ 2,14M</div>
+        <div class="kpi-sub">Operacional + Financeiro + Trib.</div>
+        <div class="kpi-badge badge-red">A regularizar</div>
+      </div>
+    </div>
+    <div style="margin-top:1px;">
+      <div class="cards-4 reveal">
+        <div class="kpi-card">
+          <div class="kpi-label">Valor Cedível Total</div>
+          <div class="kpi-value">R$ 27,9M</div>
+          <div class="kpi-sub">Precatórios negociados</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Meses c/ Receita</div>
+          <div class="kpi-value">5 meses</div>
+          <div class="kpi-sub">Agosto a Dezembro</div>
+          <div class="kpi-badge badge-blue">6 meses sem receita</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Margem Dez/2025</div>
+          <div class="kpi-value" style="color:var(--green-lt);">8,2%</div>
+          <div class="kpi-sub">vs 4,3% em Agosto</div>
+          <div class="kpi-badge badge-green">↑ Tendência positiva</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Posição Líquida</div>
+          <div class="kpi-value" style="color:#E74C3C;">−R$ 5,39M</div>
+          <div class="kpi-sub">Saldo estimado − Passivo</div>
+          <div class="kpi-badge badge-red">Requer atenção</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 · TIMELINE -->
+<section style="padding: 5rem 0;">
+  <div class="container">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-num">02 · Evolução Mensal</div>
+        <div class="section-title">Resultado Mês a Mês</div>
+      </div>
+      <div class="section-desc">Receita, despesa e resultado acumulado ao longo do ano.</div>
+    </div>
+    <div id="timeline">
+
+      <div class="timeline-item" data-delay="0">
+        <div class="timeline-month">
+          <div class="timeline-month-name" style="color:var(--muted);">Fev–Jul</div>
+          <div class="timeline-month-ops">0 operações</div>
+        </div>
+        <div class="timeline-body">
+          <div class="no-revenue">6 meses sem receita operacional. Estrutura em montagem com despesas acumuladas de <strong style="color:var(--white)">R$ 918.725</strong>. Capital provindo dos aportes iniciais.</div>
+          <div style="margin-top:1rem;">
+            <div class="bar-row">
+              <div class="bar-label">Despesas</div>
+              <div class="bar-track"><div class="bar-fill despesa" style="width:11%"></div></div>
+              <div class="bar-val" style="color:#E74C3C;">−R$ 918.725</div>
+            </div>
+          </div>
+          <div class="timeline-result" style="color:#E74C3C;">↘ Acumulado: −R$ 918.725</div>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-delay="80">
+        <div class="timeline-month">
+          <div class="timeline-month-name" style="color:var(--gold);">Ago</div>
+          <div class="timeline-month-ops">3 operações</div>
+        </div>
+        <div class="timeline-body">
+          <div class="bar-row">
+            <div class="bar-label">Receita</div>
+            <div class="bar-track"><div class="bar-fill receita" style="width:1%"></div></div>
+            <div class="bar-val" style="color:var(--green-lt);">+R$ 62.575</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Despesas</div>
+            <div class="bar-track"><div class="bar-fill despesa" style="width:44%"></div></div>
+            <div class="bar-val" style="color:#E74C3C;">−R$ 746.713</div>
+          </div>
+          <div class="timeline-result" style="color:#E74C3C;">↘ −R$ 684.138 &nbsp;·&nbsp; <span style="color:var(--gold);font-size:11px">Margem 4,3% · 1º mês com receita</span></div>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-delay="130">
+        <div class="timeline-month">
+          <div class="timeline-month-name">Set</div>
+          <div class="timeline-month-ops">7 operações</div>
+        </div>
+        <div class="timeline-body">
+          <div class="bar-row">
+            <div class="bar-label">Receita</div>
+            <div class="bar-track"><div class="bar-fill receita" style="width:7%"></div></div>
+            <div class="bar-val" style="color:var(--green-lt);">+R$ 557.176</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Despesas</div>
+            <div class="bar-track"><div class="bar-fill despesa" style="width:100%"></div></div>
+            <div class="bar-val" style="color:#E74C3C;">−R$ 1.685.218</div>
+          </div>
+          <div class="timeline-result" style="color:#E74C3C;">↘ −R$ 1.128.042 &nbsp;·&nbsp; <span style="color:var(--muted);font-size:11px">Margem 5,5% · Mês de maior despesa mensal</span></div>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-delay="180">
+        <div class="timeline-month">
+          <div class="timeline-month-name">Out</div>
+          <div class="timeline-month-ops">20 operações</div>
+        </div>
+        <div class="timeline-body">
+          <div class="bar-row">
+            <div class="bar-label">Receita</div>
+            <div class="bar-track"><div class="bar-fill receita" style="width:4%"></div></div>
+            <div class="bar-val" style="color:var(--green-lt);">+R$ 340.598</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Despesas</div>
+            <div class="bar-track"><div class="bar-fill despesa" style="width:81%"></div></div>
+            <div class="bar-val" style="color:#E74C3C;">−R$ 1.365.067</div>
+          </div>
+          <div class="timeline-result" style="color:#E74C3C;">↘ −R$ 1.024.469 &nbsp;·&nbsp; <span style="color:var(--muted);font-size:11px">Margem 5,5% · Pico de volume (20 ops)</span></div>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-delay="230">
+        <div class="timeline-month">
+          <div class="timeline-month-name">Nov</div>
+          <div class="timeline-month-ops">14 operações</div>
+        </div>
+        <div class="timeline-body">
+          <div class="bar-row">
+            <div class="bar-label">Receita</div>
+            <div class="bar-track"><div class="bar-fill receita" style="width:4%"></div></div>
+            <div class="bar-val" style="color:var(--green-lt);">+R$ 335.191</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Despesas</div>
+            <div class="bar-track"><div class="bar-fill despesa" style="width:106%"></div></div>
+            <div class="bar-val" style="color:#E74C3C;">−R$ 1.776.334</div>
+          </div>
+          <div class="timeline-result" style="color:#E74C3C;">↘ −R$ 1.441.143 &nbsp;·&nbsp; <span style="color:var(--muted);font-size:11px">Margem 7,2%</span></div>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-delay="280">
+        <div class="timeline-month">
+          <div class="timeline-month-name" style="color:var(--green-lt);">Dez</div>
+          <div class="timeline-month-ops">13 operações</div>
+        </div>
+        <div class="timeline-body">
+          <div class="bar-row">
+            <div class="bar-label">Receita</div>
+            <div class="bar-track"><div class="bar-fill receita" style="width:5%"></div></div>
+            <div class="bar-val" style="color:var(--green-lt);">+R$ 443.016</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Despesas</div>
+            <div class="bar-track"><div class="bar-fill despesa" style="width:89%"></div></div>
+            <div class="bar-val" style="color:#E74C3C;">−R$ 1.497.044</div>
+          </div>
+          <div class="timeline-result" style="color:#E74C3C;">↘ −R$ 1.054.028 &nbsp;·&nbsp; <span style="color:var(--green-lt);font-size:11px">Margem 8,2% — melhor do ano ↑</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 03 · CUSTOS -->
+<section style="padding: 5rem 0;">
+  <div class="container">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-num">03 · Despesas</div>
+        <div class="section-title">Estrutura de Custos</div>
+      </div>
+      <div class="section-desc">Composição das despesas pagas em 2025, por grupo.</div>
+    </div>
+    <div class="cards-2">
+      <div class="reveal">
+        <table class="cost-table">
+          <tr>
+            <td class="cost-name">Empréstimos de Terceiros</td>
+            <td class="cost-bar-cell"><div class="cost-bar-wrap"><div class="cost-bar-inner" style="width:73%;background:linear-gradient(90deg,#E74C3C,#C0392B);"></div></div></td>
+            <td class="cost-pct">36,8%</td>
+            <td class="cost-val">−R$ 2.938.406</td>
+          </tr>
+          <tr>
+            <td class="cost-name">Pessoal (Folha)</td>
+            <td class="cost-bar-cell"><div class="cost-bar-wrap"><div class="cost-bar-inner" style="width:55%;"></div></div></td>
+            <td class="cost-pct">20,2%</td>
+            <td class="cost-val">−R$ 1.613.202</td>
+          </tr>
+          <tr>
+            <td class="cost-name">Diretoria (Pro-Labore + Desp)</td>
+            <td class="cost-bar-cell"><div class="cost-bar-wrap"><div class="cost-bar-inner" style="width:31%;"></div></div></td>
+            <td class="cost-pct">11,5%</td>
+            <td class="cost-val">−R$ 915.709</td>
+          </tr>
+          <tr>
+            <td class="cost-name">Tecnologia</td>
+            <td class="cost-bar-cell"><div class="cost-bar-wrap"><div class="cost-bar-inner" style="width:18%;"></div></div></td>
+            <td class="cost-pct">6,6%</td>
+            <td class="cost-val">−R$ 528.817</td>
+          </tr>
+          <tr>
+            <td class="cost-name">Infraestrutura</td>
+            <td class="cost-bar-cell"><div class="cost-bar-wrap"><div class="cost-bar-inner" style="width:15%;"></div></div></td>
+            <td class="cost-pct">5,6%</td>
+            <td class="cost-val">−R$ 446.986</td>
+          </tr>
+          <tr>
+            <td class="cost-name">PJ / Consultoria Especialista</td>
+            <td class="cost-bar-cell"><div class="cost-bar-wrap"><div class="cost-bar-inner" style="width:15%;"></div></div></td>
+            <td class="cost-pct">5,6%</td>
+            <td class="cost-val">−R$ 449.447</td>
+          </tr>
+          <tr>
+            <td class="cost-name">Marketing</td>
+            <td class="cost-bar-cell"><div class="cost-bar-wrap"><div class="cost-bar-inner" style="width:5%;"></div></div></td>
+            <td class="cost-pct">1,8%</td>
+            <td class="cost-val">−R$ 145.982</td>
+          </tr>
+          <tr>
+            <td class="cost-name">Fiscal / Contábil</td>
+            <td class="cost-bar-cell"><div class="cost-bar-wrap"><div class="cost-bar-inner" style="width:4%;"></div></div></td>
+            <td class="cost-pct">1,3%</td>
+            <td class="cost-val">−R$ 101.944</td>
+          </tr>
+        </table>
+      </div>
+      <div class="reveal" style="display:flex;flex-direction:column;gap:1.5rem;">
+        <div class="diag-card warning">
+          <div class="diag-icon">⚡</div>
+          <div class="diag-title">Empréstimos: principal distorção</div>
+          <div class="diag-text">O maior item de saída foi a <strong>devolução/repasse de empréstimos de terceiros (R$ 2,94M)</strong> — mais do que toda a folha de pessoal. Excluindo esse item, o custo operacional cai para ~R$ 5,05M.</div>
+        </div>
+        <div class="diag-card">
+          <div class="diag-icon">👥</div>
+          <div class="diag-title">Pessoal + Diretoria = 31,7%</div>
+          <div class="diag-text">Combinados, folha e remuneração da diretoria somam <strong>R$ 2,53M</strong> — 45% acima da receita total de R$ 1,74M. A estrutura foi dimensionada para uma escala ainda não atingida em 2025.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 · POSIÇÃO FINANCEIRA -->
+<section style="padding: 5rem 0;">
+  <div class="container">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-num">04 · Posição Financeira</div>
+        <div class="section-title">Resultado &amp; Passivo Final</div>
+      </div>
+      <div class="section-desc">Consolidado do fluxo de caixa e obrigações em aberto ao fim de 2025.</div>
+    </div>
+    <div class="cards-2 reveal">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:var(--gold);margin-bottom:1rem;">Fluxo de Caixa</div>
+        <div class="waterfall">
+          <div class="wf-row section"><div class="wf-section-label">Entradas de Capital</div><div></div><div></div></div>
+          <div class="wf-row">
+            <div class="wf-label indent">Aporte Abril/2025</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill gold" style="width:24%"></div></div></div>
+            <div class="wf-val gold">+R$ 1.000.000</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-label indent">Aporte Agosto/2025</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill gold" style="width:29%"></div></div></div>
+            <div class="wf-val gold">+R$ 1.200.000</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-label indent">Empréstimo Agosto/2025</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill gold" style="width:19%"></div></div></div>
+            <div class="wf-val gold">+R$ 800.000</div>
+          </div>
+          <div class="wf-row total">
+            <div class="wf-label" style="font-weight:600;">Total Capital Injetado</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill gold" style="width:72%"></div></div></div>
+            <div class="wf-val gold bold">+R$ 3.000.000</div>
+          </div>
+          <div class="wf-row section"><div class="wf-section-label">Resultado Operacional</div><div></div><div></div></div>
+          <div class="wf-row">
+            <div class="wf-label indent">Receita (Cessões)</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill green" style="width:42%"></div></div></div>
+            <div class="wf-val pos">+R$ 1.738.556</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-label indent">Despesas Pagas</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill red" style="width:100%"></div></div></div>
+            <div class="wf-val neg">−R$ 7.989.100</div>
+          </div>
+          <div class="wf-row total-neg">
+            <div class="wf-label" style="font-weight:600;">Déficit Operacional</div>
+            <div class="wf-bar-cell"></div>
+            <div class="wf-val neg bold">−R$ 6.250.544</div>
+          </div>
+          <div class="wf-row total-neg">
+            <div class="wf-label" style="font-weight:700;font-size:14px;">Saldo de Caixa Estimado</div>
+            <div class="wf-bar-cell"></div>
+            <div class="wf-val neg bold" style="font-size:15px;">−R$ 3.250.544</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:var(--gold);margin-bottom:1rem;">Passivo em Aberto</div>
+        <div class="waterfall">
+          <div class="wf-row">
+            <div class="wf-label">Passivo Operacional Atrasado</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill red" style="width:23%"></div></div></div>
+            <div class="wf-val neg">−R$ 485.607</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-label">Empréstimos (saldo atrasado)</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill red" style="width:27%"></div></div></div>
+            <div class="wf-val neg">−R$ 568.129</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-label">Empréstimo R$ 800k (total)</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill red" style="width:37%"></div></div></div>
+            <div class="wf-val neg">−R$ 800.000</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-label">Passivo Tributário (estimado)</div>
+            <div class="wf-bar-cell"><div class="wf-bar-bg"><div class="wf-bar-fill red" style="width:13%"></div></div></div>
+            <div class="wf-val neg">−R$ 283.906</div>
+          </div>
+          <div class="wf-row total-neg">
+            <div class="wf-label" style="font-weight:700;font-size:14px;">Passivo Total</div>
+            <div class="wf-bar-cell"></div>
+            <div class="wf-val neg bold" style="font-size:15px;">−R$ 2.137.642</div>
+          </div>
+          <div class="wf-row" style="background:rgba(192,57,43,0.2);">
+            <div class="wf-label" style="font-weight:700;font-size:14px;">Posição Líquida Final</div>
+            <div class="wf-bar-cell"></div>
+            <div class="wf-val neg bold" style="font-size:15px;">−R$ 5.388.186</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 · DIAGNÓSTICO -->
+<section style="padding: 5rem 0;">
+  <div class="container">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-num">05 · Diagnóstico</div>
+        <div class="section-title">O que Funcionou &amp; O que Pesou</div>
+      </div>
+      <div class="section-desc">Análise qualitativa dos vetores de resultado em 2025.</div>
+    </div>
+    <div class="diag-grid reveal">
+      <div class="diag-card positive">
+        <div class="diag-icon">📈</div>
+        <div class="diag-title">Margem crescente — sinal de maturidade</div>
+        <div class="diag-text">A margem das cessões evoluiu de <strong>4,3% em agosto</strong> para <strong>8,2% em dezembro</strong> — quase dobrou em 5 meses. Isso indica aprendizado de precificação, melhor seleção de ativos e evolução na negociação com cedentes.</div>
+      </div>
+      <div class="diag-card positive">
+        <div class="diag-icon">🚀</div>
+        <div class="diag-title">Volume escalonado com sucesso</div>
+        <div class="diag-text">De <strong>3 operações em agosto</strong> para <strong>20 em outubro</strong>. A capacidade operacional foi montada e demonstrou poder de escala, com a equipe absorvendo o crescimento de volume sem travar.</div>
+      </div>
+      <div class="diag-card negative">
+        <div class="diag-icon">⏳</div>
+        <div class="diag-title">6 meses sem receita: o custo da estruturação</div>
+        <div class="diag-text">De fevereiro a julho, <strong>R$ 918.725 foram consumidos</strong> sem geração de receita. A empresa operou em modo de construção — necessário, mas custoso. O break-even de receita chegou tarde demais para o capital disponível.</div>
+      </div>
+      <div class="diag-card negative">
+        <div class="diag-icon">💸</div>
+        <div class="diag-title">Pessoal + Diretoria superam a receita</div>
+        <div class="diag-text">A remuneração total somou <strong>R$ 2,53M</strong> — 45% acima da receita operacional de R$ 1,74M. A estrutura foi dimensionada para uma escala que ainda não havia sido atingida em 2025.</div>
+      </div>
+      <div class="diag-card warning">
+        <div class="diag-icon">🔁</div>
+        <div class="diag-title">Empréstimos distorcem o real custo operacional</div>
+        <div class="diag-text">O maior item de saída — <strong>R$ 2,94M em empréstimos pagos/repassados</strong> — representa capital que circulou mas não gerou resultado. Esse fluxo mascara o tamanho real das despesas estruturais da empresa.</div>
+      </div>
+      <div class="diag-card warning">
+        <div class="diag-icon">⚠️</div>
+        <div class="diag-title">Passivo exige plano de regularização</div>
+        <div class="diag-text">Com <strong>R$ 2,14M em passivo total</strong> e saldo de caixa negativo, a entrada em 2026 requer um plano claro — especialmente para o empréstimo de R$ 800k e os Pro-Labores em aberto.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 · PERSPECTIVA -->
+<section style="padding: 5rem 0 8rem;">
+  <div class="container">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-num">06 · Perspectiva</div>
+        <div class="section-title">O que 2026 Precisa Entregar</div>
+      </div>
+      <div class="section-desc">Projeções e condições para viabilidade operacional.</div>
+    </div>
+    <div class="outlook-grid reveal">
+      <div class="outlook-text">
+        <p>O ano de 2025 foi, essencialmente, o <strong>ano zero da operação</strong>. A infraestrutura foi montada, os processos foram testados, a equipe foi formada e o aprendizado de precificação foi adquirido — ao custo de R$ 6,25M de déficit operacional.</p>
+        <p>Para 2026, o cenário muda estruturalmente: a empresa entra com <strong>12 meses de receita disponíveis</strong> (contra apenas 5 em 2025). Se a empresa mantiver o ritmo de dezembro — 13 operações a 8,2% de margem — o potencial anual é de aproximadamente <strong>R$ 5,3M de receita operacional</strong>.</p>
+        <p>Esse patamar seria suficiente para cobrir a estrutura de pessoal e diretoria (R$ 2,5M), infraestrutura e tecnologia (R$ 975k) e ainda contribuir para o pagamento do passivo — <strong>desde que os empréstimos de terceiros não continuem circulando como despesa operacional</strong>.</p>
+        <p>O crescimento de volume aliado à margem crescente é o sinal mais positivo de 2025. O desafio para 2026 é manter essa curva enquanto se reduz proporcionalmente o custo da estrutura como percentual da receita.</p>
+      </div>
+      <div class="outlook-metrics">
+        <div class="outlook-metric">
+          <div class="outlook-metric-label">Projeção Receita 2026</div>
+          <div class="outlook-metric-val" style="color:var(--green-lt);">~R$ 5,3M</div>
+          <div class="kpi-sub" style="margin-top:0.25rem;">Mantendo ritmo de Dez/2025</div>
+        </div>
+        <div class="outlook-metric">
+          <div class="outlook-metric-label">Custo Estrutural Anual</div>
+          <div class="outlook-metric-val" style="color:#E74C3C;">~R$ 3,5M</div>
+          <div class="kpi-sub" style="margin-top:0.25rem;">Pessoal + Diretoria + Infra + Tech</div>
+        </div>
+        <div class="outlook-metric">
+          <div class="outlook-metric-label">Margem p/ Break-Even</div>
+          <div class="outlook-metric-val" style="color:var(--gold-lt);">~10–12%</div>
+          <div class="kpi-sub" style="margin-top:0.25rem;">Ou +35% de volume operacional</div>
+        </div>
+        <div class="outlook-metric">
+          <div class="outlook-metric-label">Passivo Prioritário</div>
+          <div class="outlook-metric-val" style="color:#E74C3C;">R$ 2,14M</div>
+          <div class="kpi-sub" style="margin-top:0.25rem;">Empréstimo R$ 800k — urgente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">LUMMEN</div>
+  <div class="footer-note">Análise Operacional · Exercício 2025 · Uso Interno</div>
+  <div class="footer-note">Lummen Ativos Judiciais Ltda. · 2026</div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const d = parseInt(e.target.dataset.delay || 0);
+        setTimeout(() => e.target.classList.add('visible'), d);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.timeline-item').forEach(el => tlObs.observe(el));
+</script>
+
+<!-- ── FIREBASE AUTO-SAVE ──────────────────────────────────────────────── -->
+<div id="fb-indicator" style="position:fixed;bottom:80px;right:24px;background:rgba(0,212,160,0.1);border:1px solid rgba(0,212,160,0.35);color:#00d4a0;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;padding:8px 18px;border-radius:100px;opacity:0;transition:opacity 0.4s;pointer-events:none;z-index:9999;">✓ SALVO</div>
+<div id="fb-loading" style="position:fixed;bottom:80px;right:24px;background:rgba(58,143,255,0.1);border:1px solid rgba(58,143,255,0.35);color:#3a8fff;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;padding:8px 18px;border-radius:100px;opacity:1;transition:opacity 0.4s;pointer-events:none;z-index:9999;">↓ CARREGANDO</div>
+<script>
+  firebase.initializeApp({ apiKey:"AIzaSyCJybzPDCyB8IaOhjZKMtJiOpoRFz8XtpY", authDomain:"lummencfo.firebaseapp.com", projectId:"lummencfo", storageBucket:"lummencfo.firebasestorage.app", messagingSenderId:"362932670316", appId:"1:362932670316:web:82690d58e55f8570476d49" });
+  const _db = firebase.firestore();
+  const _DOC = _db.collection('plano').doc('analise2025');
+  const _SKIP = new Set(['BUTTON','SCRIPT','STYLE','SVG','PATH','RECT','CIRCLE','POLYLINE','POLYGON','LINE','G','DEFS','SYMBOL','USE','BR','WBR']);
+  function _isLeaf(el){ if(_SKIP.has(el.tagName)) return false; if(el.closest('button')) return false; if([...el.children].some(c=>!_SKIP.has(c.tagName))) return false; return el.textContent.trim().length>0; }
+  const _els=[]; let _gi=0;
+  document.querySelectorAll('body > *:not(a)').forEach(sec=>{ sec.querySelectorAll('*').forEach(el=>{ if(!_isLeaf(el)) return; const k='s'+_gi++; el.setAttribute('data-fb',k); el.contentEditable='true'; el.spellcheck=false; _els.push(el); }); });
+  _els.forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();el.blur();} }));
+  const _load=document.getElementById('fb-loading'), _ind=document.getElementById('fb-indicator');
+  _DOC.get().then(s=>{ if(s.exists){ const d=s.data(); _els.forEach(el=>{ const k=el.getAttribute('data-fb'); if(d[k]!==undefined) el.textContent=d[k]; }); } _load.style.opacity='0'; }).catch(()=>_load.style.opacity='0');
+  let _t=null;
+  function _save(){ clearTimeout(_t); _t=setTimeout(()=>{ const p={}; _els.forEach(el=>p[el.getAttribute('data-fb')]=el.textContent.trim()); _DOC.set(p,{merge:true}).then(()=>{ _ind.style.opacity='1'; setTimeout(()=>_ind.style.opacity='0',2000); }); },800); }
+  _els.forEach(el=>el.addEventListener('input',_save));
+</script>
+</body>
+</html>

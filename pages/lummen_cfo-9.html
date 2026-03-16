@@ -458,9 +458,19 @@ input[type=range].locked::-webkit-slider-thumb{background:var(--muted);box-shado
 .content-area::-webkit-scrollbar-thumb,.sb-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
 
+
+  [contenteditable="true"] { outline: none; border-radius: 3px; transition: background 0.15s, box-shadow 0.15s; }
+  [contenteditable="true"]:hover { background: rgba(0,212,160,0.07); cursor: text; }
+  [contenteditable="true"]:focus { background: rgba(0,212,160,0.11); box-shadow: 0 0 0 1.5px rgba(0,212,160,0.35); }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 </head>
 <body>
+
+<a href="../index.html" style="position:fixed;top:16px;left:16px;z-index:9999;background:rgba(2,11,24,0.88);border:1px solid #0d2640;color:#00d4a0;font-family:'Figtree',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;padding:8px 16px;border-radius:100px;text-decoration:none;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;" onmouseover="this.style.borderColor='#00d4a0'" onmouseout="this.style.borderColor='#0d2640'">← Lummen CFO</a>
 
 <div class="shell">
   <!-- SIDEBAR -->
@@ -2080,6 +2090,25 @@ calcReceita();
 
 
 
+</script>
+
+<!-- ── FIREBASE AUTO-SAVE ──────────────────────────────────────────────── -->
+<div id="fb-indicator" style="position:fixed;bottom:80px;right:24px;background:rgba(0,212,160,0.1);border:1px solid rgba(0,212,160,0.35);color:#00d4a0;font-family:'Figtree',sans-serif;font-size:11px;letter-spacing:2px;padding:8px 18px;border-radius:100px;opacity:0;transition:opacity 0.4s;pointer-events:none;z-index:9999;">✓ SALVO</div>
+<div id="fb-loading" style="position:fixed;bottom:80px;right:24px;background:rgba(58,143,255,0.1);border:1px solid rgba(58,143,255,0.35);color:#3a8fff;font-family:'Figtree',sans-serif;font-size:11px;letter-spacing:2px;padding:8px 18px;border-radius:100px;opacity:1;transition:opacity 0.4s;pointer-events:none;z-index:9999;">↓ CARREGANDO</div>
+<script>
+  firebase.initializeApp({ apiKey:"AIzaSyCJybzPDCyB8IaOhjZKMtJiOpoRFz8XtpY", authDomain:"lummencfo.firebaseapp.com", projectId:"lummencfo", storageBucket:"lummencfo.firebasestorage.app", messagingSenderId:"362932670316", appId:"1:362932670316:web:82690d58e55f8570476d49" });
+  const _db = firebase.firestore();
+  const _DOC = _db.collection('plano').doc('cfo-desk');
+  const _SKIP = new Set(['BUTTON','SCRIPT','STYLE','SVG','PATH','RECT','CIRCLE','POLYLINE','POLYGON','LINE','G','DEFS','SYMBOL','USE','BR','WBR']);
+  function _isLeaf(el){ if(_SKIP.has(el.tagName)) return false; if(el.closest('button')) return false; if([...el.children].some(c=>!_SKIP.has(c.tagName))) return false; return el.textContent.trim().length>0; }
+  const _els=[];
+  document.querySelectorAll('.view').forEach(v=>{ let i=0; v.querySelectorAll('*').forEach(el=>{ if(!_isLeaf(el)) return; const k=v.id+'__'+i++; el.setAttribute('data-fb',k); el.contentEditable='true'; el.spellcheck=false; _els.push(el); }); });
+  _els.forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();el.blur();} }));
+  const _load=document.getElementById('fb-loading'), _ind=document.getElementById('fb-indicator');
+  _DOC.get().then(s=>{ if(s.exists){ const d=s.data(); _els.forEach(el=>{ const k=el.getAttribute('data-fb'); if(d[k]!==undefined) el.textContent=d[k]; }); } _load.style.opacity='0'; }).catch(()=>_load.style.opacity='0');
+  let _t=null;
+  function _save(){ clearTimeout(_t); _t=setTimeout(()=>{ const p={}; _els.forEach(el=>p[el.getAttribute('data-fb')]=el.textContent.trim()); _DOC.set(p,{merge:true}).then(()=>{ _ind.style.opacity='1'; setTimeout(()=>_ind.style.opacity='0',2000); }); },800); }
+  _els.forEach(el=>el.addEventListener('input',_save));
 </script>
 
 </body>
